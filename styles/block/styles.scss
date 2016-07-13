@@ -1,0 +1,33 @@
+.block {
+
+  float: left;
+  position: relative;
+  margin: .8%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  font-family: monospace;
+
+}
+
+.type-2x2 {
+  width: 45%;
+  padding-bottom: 45%; /* = width for a 1:1 aspect ratio */
+
+}
+
+.type-3x3 {
+  width: 31%;
+  padding-bottom: 31%;
+}
+
+.type-4x4 {
+  width: 23%;
+  padding-bottom: 22%;
+}
+
+#empty {
+  background-color: grey;
+}
+
