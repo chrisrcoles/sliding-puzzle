@@ -13,19 +13,28 @@ class Block extends React.Component {
   }
 
   render () {
-    
-    console.log('props for block', this.props)
-
     const {id, type, value} = this.props;
+    // TODO value cannot be null, figure out way to now show missing number
+    // possibly hint
     let newValue = (this.props.id === "empty") ?
                    '' : value;
+
+    const style = {
+      float: 'left',
+      position: 'relative',
+      margin: '.8 %',
+      backgroundPosition: 'center center',
+      backgroundRepeat: 'no-repeat',
+      fontFamily: 'monospace'
+    };
 
     return (
 
       <div className={"block " + type}
            id={id}
+           style={style}
            onClick={(e) => this.props.onBlockClick(e)}>
-        {newValue}
+        {value}
 
       </div>
     )

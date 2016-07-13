@@ -2,6 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Block from './Block';
 
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+
+// check if puzzle is solvable
+// if not solvable reinitialized new puzzle
+
+
+
 import store from '../store';
 import { setBoard, blockClicked } from '../actions/game-puzzle-actions';
 
@@ -10,11 +17,10 @@ class GamePuzzle extends React.Component {
   constructor (props) {
     super(props);
 
-    this.board = null;
+    this.initialBoard = [];
+    this.solvedBoard = [];
 
   }
-
-
 
   componentWillMount () {
     store.dispatch({type: 'PAGE_MOUNT'})
@@ -31,21 +37,26 @@ class GamePuzzle extends React.Component {
   // 1. for state - see componentDidMount
   // 2. for UI
   _setPuzzle(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-    let board;
 
-    if (!numMovesAlreadyMade) {
-      console.log('no moves mad set initial board');
-      board = this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
-    } else {
-      console.log('moves already mad, repoisitioning board');
-      board = this._resetBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
-    }
-
-    return board;
+    return this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
   }
 
   _getRandomIdx (low, high) {
     return Math.floor(Math.random() * (high - low)) + low;
+  }
+
+  _arraysEqual (firstArray, secondArray) {
+    if (firstArray.length !== secondArray.length) {
+      return
+    }
+
+    for (var el = firstArray.length; el--;) {
+      if (firstArray[el] !== secondArray[el]) {
+        return false
+      }
+    }
+
+    return true;
   }
 
   _setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
@@ -53,35 +64,55 @@ class GamePuzzle extends React.Component {
     // console.log('puzzleBlocks', puzzleBlocks)
     // console.log('numMovesAlreadyMade', numMovesAlreadyMade)
     // console.log('minNumMovesForWin', minNumMovesForWin)
-    let id, puzzleBoard, offsetBlock;
     let totalNumberOfBlocks = blockSqRt * blockSqRt;
+    let initialBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
 
     // shuffle
-    let shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()]);
-    const randomBlockIdx = this._getRandomIdx(1, totalNumberOfBlocks);
+    let shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
+
+    let arraysEqual = this._arraysEqual(initialBoard, shuffledBoard);
+
+    // if arrays are the same then call reshuffle
+    if (arraysEqual) {
+      console.log('arrays were the same')
+      this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin)
+    }
+
+    this.initialBoard = shuffledBoard;
+    this.solvedBoard = initialBoard;
+
+
+    console.log('BOARD = ', initialBoard)
+    console.log('Shuffled Board = ', shuffledBoard)
+
+    console.log('arrays equal = ', arraysEqual)
+    const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
+
+    console.log('Empty Block Value = ', emptyBlockValue)
     const type = "type-" + blockSqRt + "x" + blockSqRt;
 
-    puzzleBoard = shuffledBoard.map((block, idx) => {
-      offsetBlock = block + 1;
-
-      if (offsetBlock === randomBlockIdx) {
+    let puzzleBoard = shuffledBoard.map((block, idx) => {
+      let id;
+      if (block === emptyBlockValue) {
         id = "empty";
       } else {
         id = "block-" + (idx + 1);
       }
 
       return (
-        <Block id={id}
-               key={offsetBlock}
-               value={offsetBlock}
-               type={type}
-               onBlockClick={(e) => this._handleBlockClick(e)}/>
+          <Block className={"block " + type}
+                 id={id}
+                 key={block}
+                 value={block}
+                 type={type}
+                 onBlockClick={(e) => this._handleBlockClick(e)}/>
       )
     });
 
     return puzzleBoard;
   }
 
+  // Fisher-Yates for more robust randomizing algo
   shuffleBoard (array) {
     let currentIndex = array.length;
     let temporaryValue;
@@ -103,10 +134,45 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
+  // check if move can be made
+  // if move can be made, make move
+  // if not don't do anything and log it to the user
+  // after the move is made, check the board
 
 
   _handleBlockClick (e) {
-    console.log('block clicked', e.target)
+    console.log('_handleBlockClick');
+
+    let selectedBlockId = "#" + e.target.id;
+
+    console.log('selected block with id ', selectedBlockId)
+
+    let oldPosition = $(selectedBlockId);
+    let newPosition = $('#empty');
+
+    let oldPositionClone = oldPosition.clone();
+    let newPositionClone = newPosition.clone();
+
+    console.log('oldPosition Clone  =', oldPositionClone)
+
+    console.log('newPosition Clone  =', newPositionClone)
+
+    console.log('meets condition ?? ', !newPosition.is(':empty'))
+
+    if (!newPosition.is(':empty')) {
+      console.log('can move')
+      oldPosition.replaceWith(newPositionClone);
+      newPosition.replaceWith(oldPositionClone);
+
+      // oldPosition.addClass('replaced')
+    } else {
+      console.log('not empty ')
+
+    }
+
+
+
+
     // dispatch an event that triggers game board reinitialization
     store.dispatch(blockClicked(e.target))
   }
@@ -116,7 +182,6 @@ class GamePuzzle extends React.Component {
       'Needs to be implemented'
     )
   }
-
 
   render () {
     console.log('render for game puzzle with props ', this.props )
@@ -135,7 +200,6 @@ class GamePuzzle extends React.Component {
 
 const mapStateToProps = (state) => {
   // 2. map state to correct props
-  console.log('mapStateTop Props with store = ', state)
   return {
     currentGame: state.gamePuzzleState
   }
