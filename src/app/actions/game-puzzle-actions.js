@@ -1,21 +1,36 @@
 import * as types from '../actions/action-types';
 
-export function setBoard (initialBoardDetails) {
+export function setBoard (boardDetails) {
   console.log('setBoard() action');
 
   return {
     type: types.SET_BOARD,
-    data: { initialBoardDetails }
+    data: { boardDetails }
   };
 }
 
 
-export function blockClicked (block) {
+export function blockMoved (blocks) {
   console.log('blockClicked() action');
 
   return {
-    type: types.BLOCK_CLICKED,
-    data: { block }
+    type: types.BLOCK_MOVED,
+    data: { blocks }
   }
 
+}
+
+export function blockMoveNotAllowed ( blockValue ) {
+
+  return {
+    type: types.BLOCK_MOVE_NOT_ALLOWED,
+    data: { blockValue }
+  }
+}
+
+export function puzzleSolved () {
+  return {
+    type: types.PUZZLE_SOLVED,
+    data: {}
+  }
 }

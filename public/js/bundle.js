@@ -22764,7 +22764,9 @@
 	});
 	// Search Layout
 	var SET_BOARD = exports.SET_BOARD = 'SET_BOARD';
-	var BLOCK_CLICKED = exports.BLOCK_CLICKED = 'BLOCK_CLICKED';
+	var BLOCK_MOVED = exports.BLOCK_MOVED = 'BLOCK_MOVED';
+	var BLOCK_MOVE_NOT_ALLOWED = exports.BLOCK_MOVE_NOT_ALLOWED = 'BLOCKED_CLICKED_NOT_ALLOWED';
+	var PUZZLE_SOLVED = exports.PUZZLE_SOLVED = 'PUZZLED SOLVED';
 
 /***/ },
 /* 198 */
@@ -22790,10 +22792,14 @@
 	
 	var initialState = {
 	  boardWidth: 3,
-	  initialBoard: [],
-	  currentBoard: [],
-	  solvedBoard: [],
-	  emptyBlock: {},
+	  boardHeight: 3,
+	  emptyBlockIdx: null,
+	  boards: {
+	    initialBoard: [],
+	    currentBoard: [],
+	    solvedBoard: [],
+	    positionalBoard: []
+	  },
 	  numMovesAlreadyMade: 0,
 	  boardSolved: false
 	};
@@ -22803,47 +22809,113 @@
 	  var action = arguments[1];
 	
 	
-	  console.log('gamePuzzleReducer() ');
-	  console.log('state = ', state);
-	  console.log('action = ', action);
+	  console.log('Game Puzzle Reducer() ');
+	  console.log('incoming action = ', action);
 	
 	  switch (action.type) {
 	
-	    // set initial board state, sets puzzle blocks
 	    case types.SET_BOARD:
 	      var currentBoard = void 0;
-	      var initialBoardDetails = action.data.initialBoardDetails;
+	      var boardDetails = action.data.boardDetails;
 	
-	      if (!state.initialBoard.length) {
-	        console.log('first set of set board');
-	        currentBoard = initialBoardDetails.initialBoard;
+	      if (!state.boards.initialBoard.length) {
+	        currentBoard = boardDetails.initialBoard;
 	      } else {
 	        currentBoard = state.currentBoard;
 	      }
+	
 	      state = Object.assign({}, state, {
-	        initialBoard: initialBoardDetails.initialBoard,
-	        emptyBlock: {
-	          initialValue: initialBoardDetails.emptyBlockValue,
-	          initialIndex: initialBoardDetails.emptyBlockIdx
-	        },
 	        numMovesAlreadyMade: 0,
-	        solvedBoard: initialBoardDetails.solvedAndSetBoard,
-	        currentBoard: currentBoard
+	        emptyBlockIdx: boardDetails.emptyBlockIdx,
+	        boards: {
+	          initialBoard: boardDetails.initialBoard,
+	          solvedBoard: boardDetails.solvedAndSetBoard,
+	          positionalBoard: boardDetails.positionalBoard,
+	          currentBoard: currentBoard
+	        }
 	      });
 	      break;
 	
-	    case types.BLOCK_CLICKED:
-	      console.log('set board block clicked reducer called, ', action);
-	      // console.log('state = ', state)
-	      state = Object.assign({}, state, {
-	        boardWidth: state.boardWidth,
-	        numMovesAlreadyMade: state.numMovesAlreadyMade + 1
-	      });
+	    case types.BLOCK_MOVED:
+	      state = _getStateForBlockMoved(state, action);
 	      break;
+	
+	    case types.BLOCK_MOVE_NOT_ALLOWED:
+	      console.log('BLOCK CLICK NOT ALLOWED');
+	      state = Object.assign({}, state);
+	      break;
+	
+	    case types.PUZZLE_SOLVED:
+	      state = Object.assign({}, state, {
+	        boardSolved: true
+	      });
 	
 	  }
 	
+	  console.log('set state = ', state);
 	  return state;
+	};
+	
+	var _getStateForBlockMoved = function _getStateForBlockMoved(state, action) {
+	  var _action$data$blocks = action.data.blocks;
+	  var targetBlock = _action$data$blocks.targetBlock;
+	  var emptyBlock = _action$data$blocks.emptyBlock;
+	
+	  var currentBoard = state.boards.currentBoard.slice();
+	  var positionalBoard = state.boards.positionalBoard.slice();
+	
+	  var targetBlockValue = targetBlock.ref.value;
+	  var emptyBlockValue = emptyBlock.ref.value;
+	
+	  var targetBlock2DArrayIdx = targetBlock.boardIdx;
+	  var emptyBlock2DArrayIdx = emptyBlock.boardIdx;
+	
+	  var targetBlockOldArrIdx = currentBoard.indexOf(targetBlockValue);
+	  var emptyBlockOldArrIdx = currentBoard.indexOf(emptyBlockValue);
+	
+	  var targetBlockIdxInNestedPositionalArray = void 0;
+	  var emptyBlockIdxInNestedPositionalArray = void 0;
+	
+	  var temp = currentBoard[targetBlockOldArrIdx];
+	
+	  // update current board
+	  currentBoard[targetBlockOldArrIdx] = currentBoard[emptyBlockOldArrIdx];
+	  currentBoard[emptyBlockOldArrIdx] = temp;
+	
+	  positionalBoard[targetBlock2DArrayIdx].forEach(function (block, idx) {
+	    if (block.value === targetBlockValue) {
+	      targetBlockIdxInNestedPositionalArray = idx;
+	    }
+	  });
+	
+	  positionalBoard[emptyBlock2DArrayIdx].forEach(function (block, idx) {
+	    if (block.value === emptyBlockValue) {
+	      emptyBlockIdxInNestedPositionalArray = idx;
+	    }
+	  });
+	
+	  // update positional board
+	  positionalBoard[targetBlock2DArrayIdx][targetBlockIdxInNestedPositionalArray] = {
+	    x: targetBlock.ref.x,
+	    y: targetBlock.ref.y,
+	    value: emptyBlock.ref.value
+	  };
+	  positionalBoard[emptyBlock2DArrayIdx][emptyBlockIdxInNestedPositionalArray] = {
+	    x: emptyBlock.ref.x,
+	    y: emptyBlock.ref.y,
+	    value: targetBlock.ref.value
+	  };
+	
+	  return Object.assign({}, state, {
+	    numMovesAlreadyMade: state.numMovesAlreadyMade + 1,
+	    emptyBlockIdx: targetBlockOldArrIdx,
+	    boards: {
+	      positionalBoard: positionalBoard,
+	      currentBoard: currentBoard,
+	      initialBoard: state.boards.initialBoard,
+	      solvedBoard: state.boards.solvedBoard
+	    }
+	  });
 	};
 	
 	exports.default = gamePuzzleReducer;
@@ -44872,17 +44944,15 @@
 	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var boardWidth = this.props.currentGame.boardWidth;
+	      var _props$currentGame = this.props.currentGame;
+	      var boardWidth = _props$currentGame.boardWidth;
+	      var boardHeight = _props$currentGame.boardHeight;
 	
-	      var initialBoardDetails = this._setBoard(boardWidth);
+	      var boardDetails = this._setBoard(boardWidth, boardHeight);
 	
 	      // update the state with the same parameters no matter what
-	      _store2.default.dispatch((0, _gamePuzzleActions.setBoard)(initialBoardDetails));
+	      _store2.default.dispatch((0, _gamePuzzleActions.setBoard)(boardDetails));
 	    }
-	
-	    // 1. for state - see componentDidMount
-	    // 2. for UI
-	
 	  }, {
 	    key: '_getRandomIdx',
 	    value: function _getRandomIdx(low, high) {
@@ -44903,7 +44973,6 @@
 	
 	      return true;
 	    }
-	
 	    // Fisher-Yates for more robust randomizing algo
 	
 	  }, {
@@ -44930,9 +44999,9 @@
 	    }
 	  }, {
 	    key: '_setBoard',
-	    value: function _setBoard(boardWidth) {
+	    value: function _setBoard(boardWidth, boardHeight) {
 	
-	      var totalNumberOfBlocks = boardWidth * boardWidth;
+	      var totalNumberOfBlocks = boardWidth * boardHeight;
 	
 	      var shuffledBoard = this.shuffleBoard([].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
 	        return i + 1;
@@ -44945,34 +45014,69 @@
 	      var arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 	
 	      if (arraysEqual) {
-	        this._setBoard(boardWidth);
+	        this._setBoard(boardWidth, boardHeight);
 	      }
 	
-	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth);
+	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight);
 	    }
 	  }, {
-	    key: '_prepareMultiDimensionalBoard',
-	    value: function _prepareMultiDimensionalBoard(board, boardWidth) {
-	      var multidimensionalBoard = void 0;
-	      var arr1 = [];
+	    key: '_getPositionalBoard',
+	    value: function _getPositionalBoard(board, boardWidth) {
+	      var row = 1;
+	      var column = 1;
+	      var positionalBoard = [];
 	
-	      for (var b = 0; b < boardWidth; b++) {
-	
-	        var _arr = new Array(boardWidth);
-	
-	        for (var j = 0; j < _arr.length; j++) {
-	          _arr.push({ x: 'hi', y: '' });
+	      board.forEach(function (block) {
+	        if (column > boardWidth) {
+	          row++;
+	          column = 1;
 	        }
 	
-	        arr1.push(_arr);
+	        var position = {
+	          x: row,
+	          y: column,
+	          value: block
+	        };
+	
+	        column++;
+	        positionalBoard.push(position);
+	      });
+	
+	      return positionalBoard;
+	    }
+	  }, {
+	    key: '_get2DBoard',
+	    value: function _get2DBoard(dimensions) {
+	      var array = [];
+	
+	      for (var i = 0; i < dimensions[0]; ++i) {
+	        array.push(dimensions.length == 1 ? 0 : this._get2DBoard(dimensions.slice(1)));
 	      }
 	
-	      console.log('prepareMultiDimensionalBoard = arr1 ', arr1);
-	      console.log('prepareMultiDimensionalBoard = arr2 ', arr2);
+	      return array;
+	    }
+	  }, {
+	    key: '_preparePositional2DBoard',
+	    value: function _preparePositional2DBoard(board, boardWidth, boardHeight) {
+	      var position = void 0;
+	      var dimensions = [boardWidth, boardHeight];
+	      var positionalBoard = this._getPositionalBoard(board, boardWidth);
+	      var multidimensionalBoard = this._get2DBoard(dimensions);
+	
+	      for (var i = 0; i < multidimensionalBoard.length; i++) {
+	        for (var j = 0; j < multidimensionalBoard[i].length; j++) {
+	          position = positionalBoard.pop();
+	          multidimensionalBoard[i][j] = position;
+	        }
+	      }
+	
+	      return multidimensionalBoard.reverse().map(function (b) {
+	        return b.reverse();
+	      });
 	    }
 	  }, {
 	    key: '_prepareBoard',
-	    value: function _prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth) {
+	    value: function _prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight) {
 	
 	      var initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
 	      var solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
@@ -44981,9 +45085,9 @@
 	      var emptyBlockIdx = initialBoardData.emptyBlockIdx;
 	
 	
-	      var multidimensionalBoard = this._prepareMultiDimensionalBoard(initialBoard, boardWidth);
+	      var positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
 	
-	      return { solvedAndSetBoard: solvedAndSetBoard, initialBoard: initialBoard, emptyBlockIdx: emptyBlockIdx, emptyBlockValue: emptyBlockValue };
+	      return { initialBoard: initialBoard, positionalBoard: positionalBoard, solvedAndSetBoard: solvedAndSetBoard, emptyBlockIdx: emptyBlockIdx, emptyBlockValue: emptyBlockValue };
 	    }
 	  }, {
 	    key: '_prepareSolvedAndSetBoard',
@@ -45030,6 +45134,89 @@
 	
 	      return { initialBoard: initialBoard, emptyBlockIdx: emptyBlockIdx };
 	    }
+	  }, {
+	    key: '_checkIfBlockIsAdjacent',
+	    value: function _checkIfBlockIsAdjacent(targetPositionValue, positionalBoard) {
+	      var emptyBlock = void 0;
+	      var targetBlock = void 0;
+	      var acceptableXPosition = void 0;
+	      var acceptableYPosition = void 0;
+	      var adjacent = void 0;
+	      var targetPositionValueInt = parseInt(targetPositionValue, 10);
+	
+	      positionalBoard.forEach(function (board, boardIdx) {
+	        board.forEach(function (ref) {
+	          if (!ref.value) {
+	            emptyBlock = { ref: ref, boardIdx: boardIdx };
+	          }
+	
+	          if (ref.value === targetPositionValueInt) {
+	            targetBlock = { ref: ref, boardIdx: boardIdx };
+	          }
+	        });
+	      });
+	
+	      if (targetBlock.ref.y === emptyBlock.ref.y) {
+	        var max = Math.max(targetBlock.boardIdx, emptyBlock.boardIdx);
+	        var min = Math.min(targetBlock.boardIdx, emptyBlock.boardIdx);
+	
+	        if (max - min === 1) {
+	          acceptableYPosition = true;
+	        }
+	      }
+	
+	      if (targetBlock.ref.x === emptyBlock.ref.x) {
+	        var _max = Math.max(targetBlock.ref.y, emptyBlock.ref.y);
+	        var _min = Math.min(targetBlock.ref.y, emptyBlock.ref.y);
+	
+	        if (_max - _min === 1) {
+	          acceptableXPosition = true;
+	        }
+	      }
+	
+	      if (acceptableXPosition || acceptableYPosition) {
+	        console.log('BLOCK CAN BE MOVED IS ADJACENT');
+	        adjacent = true;
+	        return { adjacent: adjacent, emptyBlock: emptyBlock, targetBlock: targetBlock };
+	      } else {
+	        console.log('BLOCK CANNOT BE MOVED IS NOT ADJACENT');
+	        adjacent = false;
+	        return { adjacent: adjacent, emptyBlock: emptyBlock, targetBlock: targetBlock };
+	      }
+	    }
+	  }, {
+	    key: '_checkIfBlockCanBeMoved',
+	    value: function _checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition) {
+	      var _checkIfBlockIsAdjace = this._checkIfBlockIsAdjacent(targetPositionValue, positionalBoard);
+	
+	      var adjacent = _checkIfBlockIsAdjace.adjacent;
+	      var emptyBlock = _checkIfBlockIsAdjace.emptyBlock;
+	      var targetBlock = _checkIfBlockIsAdjace.targetBlock;
+	
+	      var canBeMoved = this._checkIfPositionCanBeMoved(emptyPosition);
+	      var positionCanBeMoved = void 0;
+	
+	      if (adjacent && canBeMoved) {
+	        positionCanBeMoved = true;
+	        return { positionCanBeMoved: positionCanBeMoved, emptyBlock: emptyBlock, targetBlock: targetBlock };
+	      } else {
+	        positionCanBeMoved = false;
+	        return { positionCanBeMoved: positionCanBeMoved, emptyBlock: emptyBlock, targetBlock: targetBlock };
+	      }
+	    }
+	  }, {
+	    key: '_checkIfPositionCanBeMoved',
+	    value: function _checkIfPositionCanBeMoved(emptyPosition) {
+	      console.log(emptyPosition, 'emptyPosition');
+	
+	      if (!emptyPosition.is(':empty')) {
+	        console.log('BLOCK CAN BE MOVED ', !emptyPosition.is(':empty'), ' IS EMPTY');
+	      } else {
+	        console.log('BLOCK CANNOT BE MOVED ', !emptyPosition.is(':empty'), ' IS NOT EMPTY');
+	      }
+	
+	      return !emptyPosition.is(':empty');
+	    }
 	
 	    // check if move can be made
 	    // if move can be made, make move
@@ -45039,55 +45226,83 @@
 	  }, {
 	    key: '_handleBlockClick',
 	    value: function _handleBlockClick(e) {
-	      console.log('_handleBlockClick');
+	      console.log('_handleBlockClick() called');
+	      var boards = this.props.currentGame.boards;
 	
-	      var selectedBlockId = "#" + e.target.id;
+	      var positionalBoard = boards.positionalBoard;
+	      var solvedBoard = boards.solvedBoard;
+	      var currentBoard = boards.currentBoard;
 	
-	      console.log('selected block with id ', selectedBlockId);
+	      var target = "#" + e.target.id;
 	
-	      var oldPosition = $(selectedBlockId);
-	      var newPosition = $('#empty');
+	      var targetPosition = $(target);
+	      var emptyPosition = $('#empty');
 	
-	      var oldPositionClone = oldPosition.clone(true, true);
-	      var newPositionClone = newPosition.clone(true, true);
+	      var targetPositionValue = targetPosition.text();
+	
+	      var _checkIfBlockCanBeMov = this._checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition);
+	
+	      var positionCanBeMoved = _checkIfBlockCanBeMov.positionCanBeMoved;
+	      var emptyBlock = _checkIfBlockCanBeMov.emptyBlock;
+	      var targetBlock = _checkIfBlockCanBeMov.targetBlock;
+	
+	
+	      if (!positionCanBeMoved) {
+	        console.log('BLOCK CANNOT BE MOVED FOR SOME REASON PLEASE SEE ABOVE');
+	        _store2.default.dispatch((0, _gamePuzzleActions.blockMoveNotAllowed)({ targetPositionValue: targetPositionValue }));
+	        return;
+	      }
+	
+	      this._replaceBlock(emptyPosition, targetPosition);
+	
+	      _store2.default.dispatch((0, _gamePuzzleActions.blockMoved)({ emptyBlock: emptyBlock, targetBlock: targetBlock }));
+	
+	      this._checkIfPuzzleSolved(currentBoard, solvedBoard);
+	    }
+	  }, {
+	    key: '_checkIfPuzzleSolved',
+	    value: function _checkIfPuzzleSolved(currentBoard, solvedBoard) {
+	      var arraysEqual = this._arraysEqual(currentBoard, solvedBoard);
+	
+	      if (arraysEqual) {
+	        _store2.default.dispatch((0, _gamePuzzleActions.puzzleSolved)());
+	      }
+	    }
+	  }, {
+	    key: '_replaceBlock',
+	    value: function _replaceBlock(emptyPosition, targetPosition) {
+	      console.log('empty position = ', emptyPosition);
+	      console.log('target position = ', targetPosition);
+	
+	      var oldPositionClone = targetPosition.clone(true);
+	      var newPositionClone = emptyPosition.clone(true);
 	
 	      console.log('oldPosition Clone  =', oldPositionClone);
+	      console.log('emptyPosition Clone  =', newPositionClone);
 	
-	      console.log('newPosition Clone  =', newPositionClone);
-	
-	      console.log('meets condition ?? ', !newPosition.is(':empty'));
-	
-	      if (!newPosition.is(':empty')) {
-	        console.log('can move');
-	        oldPosition.replaceWith(newPositionClone);
-	        newPosition.replaceWith(oldPositionClone);
-	
-	        // oldPosition.addClass('replaced')
-	      } else {
-	        console.log('not empty ');
-	      }
-	      // dispatch an event that triggers game board reinitialization
-	      _store2.default.dispatch((0, _gamePuzzleActions.blockClicked)(e.target));
+	      targetPosition.replaceWith(newPositionClone);
+	      emptyPosition.replaceWith(oldPositionClone);
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var _this2 = this;
 	
-	      console.log('render for game puzzle with props ', this.props);
-	      var _props$currentGame = this.props.currentGame;
-	      var boardWidth = _props$currentGame.boardWidth;
-	      var currentBoard = _props$currentGame.currentBoard;
-	      var emptyBlock = _props$currentGame.emptyBlock;
-	      var minNumMovesForWin = _props$currentGame.minNumMovesForWin;
-	
-	      var puzzleBlocks = [];
 	      var id = void 0,
 	          value = void 0;
+	      var puzzleBlocks = [];
+	
+	      var _props$currentGame2 = this.props.currentGame;
+	      var boardWidth = _props$currentGame2.boardWidth;
+	      var boards = _props$currentGame2.boards;
+	      var emptyBlockIdx = _props$currentGame2.emptyBlockIdx;
+	      var minNumMovesForWin = _props$currentGame2.minNumMovesForWin;
+	
 	      var type = "type-" + boardWidth + "x" + boardWidth;
+	      var currentBoard = boards.currentBoard;
 	
 	      currentBoard.forEach(function (block, idx) {
-	        if (idx === emptyBlock.initialIndex) {
+	        if (idx === emptyBlockIdx) {
 	          id = "empty";
 	          value = ".";
 	        } else {
@@ -45104,6 +45319,7 @@
 	          } }));
 	      });
 	
+	      console.log('render for game puzzle with props ', this.props);
 	      return _react2.default.createElement(
 	        'section',
 	        { className: 'game-puzzle' },
@@ -46051,7 +46267,9 @@
 	  value: true
 	});
 	exports.setBoard = setBoard;
-	exports.blockClicked = blockClicked;
+	exports.blockMoved = blockMoved;
+	exports.blockMoveNotAllowed = blockMoveNotAllowed;
+	exports.puzzleSolved = puzzleSolved;
 	
 	var _actionTypes = __webpack_require__(197);
 	
@@ -46059,21 +46277,36 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
-	function setBoard(initialBoardDetails) {
+	function setBoard(boardDetails) {
 	  console.log('setBoard() action');
 	
 	  return {
 	    type: types.SET_BOARD,
-	    data: { initialBoardDetails: initialBoardDetails }
+	    data: { boardDetails: boardDetails }
 	  };
 	}
 	
-	function blockClicked(block) {
+	function blockMoved(blocks) {
 	  console.log('blockClicked() action');
 	
 	  return {
-	    type: types.BLOCK_CLICKED,
-	    data: { block: block }
+	    type: types.BLOCK_MOVED,
+	    data: { blocks: blocks }
+	  };
+	}
+	
+	function blockMoveNotAllowed(blockValue) {
+	
+	  return {
+	    type: types.BLOCK_MOVE_NOT_ALLOWED,
+	    data: { blockValue: blockValue }
+	  };
+	}
+	
+	function puzzleSolved() {
+	  return {
+	    type: types.PUZZLE_SOLVED,
+	    data: {}
 	  };
 	}
 

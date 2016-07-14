@@ -41,3 +41,10 @@ jspm_packages
 
 # Webstorm Config
 .idea
+
+# Build Public Files
+public/js/bundle.js
+public/js/bundle.map
+
+# Sandbox file
+test.js

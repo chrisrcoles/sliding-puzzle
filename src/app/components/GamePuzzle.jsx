@@ -10,7 +10,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 
 import store from '../store';
-import { setBoard, blockClicked } from '../actions/game-puzzle-actions';
+import { setBoard, blockMoved, blockMoveNotAllowed, puzzleSolved } from '../actions/game-puzzle-actions';
 
 class GamePuzzle extends React.Component {
 
@@ -19,20 +19,15 @@ class GamePuzzle extends React.Component {
 
   }
 
-  componentWillMount () {
-
-  }
+  componentWillMount () {}
 
   componentDidMount () {
-    const { boardWidth } = this.props.currentGame;
-    const initialBoardDetails = this._setBoard(boardWidth);
+    const { boardWidth, boardHeight } = this.props.currentGame;
+    const boardDetails = this._setBoard(boardWidth, boardHeight);
 
     // update the state with the same parameters no matter what
-    store.dispatch(setBoard(initialBoardDetails));
+    store.dispatch(setBoard(boardDetails));
   }
-
-  // 1. for state - see componentDidMount
-  // 2. for UI
 
   _getRandomIdx (low, high) {
     return Math.floor(Math.random() * (high - low)) + low;
@@ -51,7 +46,6 @@ class GamePuzzle extends React.Component {
 
     return true;
   }
-
   // Fisher-Yates for more robust randomizing algo
   shuffleBoard (array) {
     let currentIndex = array.length;
@@ -74,9 +68,9 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
-  _setBoard(boardWidth) {
+  _setBoard(boardWidth, boardHeight) {
 
-    let totalNumberOfBlocks = boardWidth * boardWidth;
+    let totalNumberOfBlocks = boardWidth * boardHeight;
 
     const shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
     const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
@@ -85,44 +79,72 @@ class GamePuzzle extends React.Component {
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
     if (arraysEqual) {
-      this._setBoard(boardWidth)
+      this._setBoard(boardWidth, boardHeight)
     }
 
-    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth)
+    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
   }
 
-  _prepareMultiDimensionalBoard(board, boardWidth) {
-    let multidimensionalBoard;
-    let arr1 = []
+  _getPositionalBoard(board, boardWidth) {
+    let row = 1;
+    let column = 1;
+    let positionalBoard = [];
 
-    for (var b = 0; b < boardWidth; b++) {
-
-
-      let arr2 = new Array(boardWidth);
-
-      for (var j = 0; j < arr2.length; j++ ) {
-        arr2.push({x: 'hi', y: ''})
+    board.forEach(block => {
+      if (column > boardWidth) {
+        row++;
+        column = 1;
       }
 
+      var position = {
+        x: row,
+        y: column,
+        value: block
+      };
 
-      arr1.push(arr2)
-    }
+      column++;
+      positionalBoard.push(position)
+    });
 
-    console.log('prepareMultiDimensionalBoard = arr1 ', arr1)
-    console.log('prepareMultiDimensionalBoard = arr2 ', arr2)
-
+    return positionalBoard
   }
 
-  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, boardWidth) {
+  _get2DBoard(dimensions) {
+    var array = [];
+
+    for (var i = 0; i < dimensions[0]; ++i) {
+      array.push(dimensions.length == 1 ? 0 : this._get2DBoard(dimensions.slice(1)));
+    }
+
+    return array;
+  }
+
+  _preparePositional2DBoard(board, boardWidth, boardHeight) {
+    let position;
+    let dimensions = [boardWidth, boardHeight];
+    let positionalBoard = this._getPositionalBoard(board, boardWidth);
+    let multidimensionalBoard = this._get2DBoard(dimensions);
+
+    for (var i = 0; i < multidimensionalBoard.length; i++) {
+      for (var j = 0; j < multidimensionalBoard[i].length; j++) {
+        position = positionalBoard.pop();
+        multidimensionalBoard[i][j] = position
+      }
+    }
+
+    return multidimensionalBoard.reverse().map((b) => b.reverse())
+  }
+
+  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight) {
 
     let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
     let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
 
     const { initialBoard, emptyBlockIdx } = initialBoardData;
 
-    let multidimensionalBoard = this._prepareMultiDimensionalBoard(initialBoard, boardWidth)
+    let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight)
 
-    return {solvedAndSetBoard, initialBoard, emptyBlockIdx, emptyBlockValue };
+    return {initialBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue };
   }
 
   _prepareSolvedAndSetBoard (board, value) {
@@ -172,54 +194,150 @@ class GamePuzzle extends React.Component {
     return { initialBoard, emptyBlockIdx }
   }
 
+  _checkIfBlockIsAdjacent(targetPositionValue, positionalBoard) {
+    let emptyBlock;
+    let targetBlock;
+    let acceptableXPosition;
+    let acceptableYPosition;
+    let adjacent
+    let targetPositionValueInt = parseInt(targetPositionValue, 10);
+
+    positionalBoard.forEach((board, boardIdx) => {
+      board.forEach(ref => {
+        if (!ref.value) {
+          emptyBlock = {ref, boardIdx }
+        }
+
+        if (ref.value === targetPositionValueInt) {
+          targetBlock = {ref, boardIdx}
+        }
+      })
+    });
+
+    if (targetBlock.ref.y === emptyBlock.ref.y) {
+      let max = Math.max(targetBlock.boardIdx, emptyBlock.boardIdx);
+      let min = Math.min(targetBlock.boardIdx, emptyBlock.boardIdx);
+
+      if (max - min === 1) {
+        acceptableYPosition = true
+      }
+    }
+
+    if (targetBlock.ref.x === emptyBlock.ref.x) {
+      let max = Math.max(targetBlock.ref.y, emptyBlock.ref.y);
+      let min = Math.min(targetBlock.ref.y, emptyBlock.ref.y);
+
+      if (max - min === 1) {
+        acceptableXPosition = true
+      }
+
+    }
+
+    if (acceptableXPosition || acceptableYPosition) {
+      console.log('BLOCK CAN BE MOVED IS ADJACENT')
+      adjacent = true;
+      return {adjacent, emptyBlock, targetBlock }
+    } else {
+      console.log('BLOCK CANNOT BE MOVED IS NOT ADJACENT')
+      adjacent = false;
+      return {adjacent, emptyBlock, targetBlock}
+    }
+  }
+
+  _checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition) {
+    const { adjacent, emptyBlock, targetBlock } = this._checkIfBlockIsAdjacent(targetPositionValue, positionalBoard);
+    let canBeMoved = this._checkIfPositionCanBeMoved(emptyPosition);
+    let positionCanBeMoved;
+
+    if (adjacent && canBeMoved) {
+      positionCanBeMoved = true;
+      return {positionCanBeMoved, emptyBlock, targetBlock }
+    } else {
+      positionCanBeMoved = false;
+      return {positionCanBeMoved, emptyBlock, targetBlock }
+    }
+
+  }
+
+  _checkIfPositionCanBeMoved(emptyPosition) {
+    console.log(emptyPosition, 'emptyPosition')
+
+    if (!emptyPosition.is(':empty')) {
+      console.log('BLOCK CAN BE MOVED ', !emptyPosition.is(':empty'), ' IS EMPTY')
+    } else {
+      console.log('BLOCK CANNOT BE MOVED ', !emptyPosition.is(':empty'), ' IS NOT EMPTY')
+    }
+
+    return !emptyPosition.is(':empty')
+  }
+
   // check if move can be made
   // if move can be made, make move
   // if not don't do anything and log it to the user
   // after the move is made, check the board
   _handleBlockClick (e) {
-    console.log('_handleBlockClick');
+    console.log('_handleBlockClick() called');
+    const { boards } = this.props.currentGame;
+    const positionalBoard =  boards.positionalBoard;
+    const solvedBoard = boards.solvedBoard;
+    const currentBoard = boards.currentBoard;
 
-    let selectedBlockId = "#" + e.target.id;
+    let target = "#" + e.target.id;
 
-    console.log('selected block with id ', selectedBlockId)
+    let targetPosition = $(target);
+    let emptyPosition = $('#empty');
 
-    let oldPosition = $(selectedBlockId);
-    let newPosition = $('#empty');
+    let targetPositionValue = targetPosition.text();
 
-    let oldPositionClone = oldPosition.clone(true, true);
-    let newPositionClone = newPosition.clone(true, true);
+    const {positionCanBeMoved, emptyBlock, targetBlock} = this._checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition);
 
-    console.log('oldPosition Clone  =', oldPositionClone)
-
-    console.log('newPosition Clone  =', newPositionClone)
-
-    console.log('meets condition ?? ', !newPosition.is(':empty'))
-
-    if (!newPosition.is(':empty')) {
-      console.log('can move')
-      oldPosition.replaceWith(newPositionClone);
-      newPosition.replaceWith(oldPositionClone);
-
-      // oldPosition.addClass('replaced')
-    } else {
-      console.log('not empty ')
-
+    if (!positionCanBeMoved) {
+      console.log('BLOCK CANNOT BE MOVED FOR SOME REASON PLEASE SEE ABOVE');
+      store.dispatch(blockMoveNotAllowed({ targetPositionValue }));
+      return
     }
-    // dispatch an event that triggers game board reinitialization
-    store.dispatch(blockClicked(e.target))
+
+    this._replaceBlock(emptyPosition, targetPosition);
+
+    store.dispatch(blockMoved({ emptyBlock, targetBlock }))
+
+    this._checkIfPuzzleSolved(currentBoard, solvedBoard)
+  }
+
+  _checkIfPuzzleSolved (currentBoard, solvedBoard) {
+    const arraysEqual = this._arraysEqual(currentBoard, solvedBoard);
+
+    if (arraysEqual) {
+      store.dispatch(puzzleSolved())
+    }
+  }
+
+
+  _replaceBlock(emptyPosition, targetPosition) {
+    console.log('empty position = ', emptyPosition);
+    console.log('target position = ', targetPosition);
+
+    let oldPositionClone = targetPosition.clone(true);
+    let newPositionClone = emptyPosition.clone(true);
+
+    console.log('oldPosition Clone  =', oldPositionClone);
+    console.log('emptyPosition Clone  =', newPositionClone);
+
+    targetPosition.replaceWith(newPositionClone);
+    emptyPosition.replaceWith(oldPositionClone);
   }
 
 
   render () {
-    console.log('render for game puzzle with props ', this.props );
-    const {boardWidth, currentBoard, emptyBlock, minNumMovesForWin} = this.props.currentGame
-    let puzzleBlocks = [];
     let id, value;
-    const type = "type-" + boardWidth + "x" + boardWidth;
+    let puzzleBlocks = [];
 
+    const {boardWidth, boards, emptyBlockIdx, minNumMovesForWin} = this.props.currentGame
+    const type = "type-" + boardWidth + "x" + boardWidth;
+    let currentBoard = boards.currentBoard;
 
     currentBoard.forEach((block, idx) => {
-      if (idx === emptyBlock.initialIndex) {
+      if (idx === emptyBlockIdx) {
         id = "empty"
         value = "."
       } else {
@@ -237,6 +355,7 @@ class GamePuzzle extends React.Component {
 
     });
 
+    console.log('render for game puzzle with props ', this.props);
     return (
       <section className="game-puzzle">
         <div className="puzzle-blocks">
