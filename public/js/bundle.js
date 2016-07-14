@@ -22790,9 +22790,12 @@
 	
 	var initialState = {
 	  blockSqRt: 3,
-	  puzzleBlocks: [],
+	  initialBoard: [],
+	  currentBoard: [],
+	  solvedBoard: [],
+	  emptyBlock: {},
 	  numMovesAlreadyMade: 0,
-	  minNumMovesForWin: 0
+	  boardSolved: false
 	};
 	
 	var gamePuzzleReducer = function gamePuzzleReducer() {
@@ -22808,14 +22811,32 @@
 	
 	    // set initial board state, sets puzzle blocks
 	    case types.SET_BOARD:
-	      state = Object.assign({}, state);
+	      var currentBoard = void 0;
+	      var initialBoardDetails = action.data.initialBoardDetails;
+	
+	      if (!state.initialBoard.length) {
+	        console.log('first set of set board');
+	        currentBoard = initialBoardDetails.initialBoard;
+	      } else {
+	        currentBoard = state.currentBoard;
+	      }
+	      state = Object.assign({}, state, {
+	        initialBoard: initialBoardDetails.initialBoard,
+	        emptyBlock: {
+	          initialValue: initialBoardDetails.emptyBlockValue,
+	          initialIndex: initialBoardDetails.emptyBlockIdx
+	        },
+	        numMovesAlreadyMade: 0,
+	        solvedBoard: initialBoardDetails.solvedAndSetBoard,
+	        currentBoard: currentBoard
+	      });
+	      break;
 	
 	    case types.BLOCK_CLICKED:
-	      // console.log('set board reducer called, ', action)
+	      console.log('set board block clicked reducer called, ', action);
 	      // console.log('state = ', state)
 	      state = Object.assign({}, state, {
 	        blockSqRt: state.blockSqRt,
-	        puzzleBlocks: state.puzzleBlocks,
 	        numMovesAlreadyMade: state.numMovesAlreadyMade + 1
 	      });
 	      break;
@@ -44842,43 +44863,28 @@
 	  function GamePuzzle(props) {
 	    _classCallCheck(this, GamePuzzle);
 	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GamePuzzle).call(this, props));
-	
-	    _this.initialBoard = [];
-	    _this.solvedBoard = [];
-	
-	    return _this;
+	    return _possibleConstructorReturn(this, Object.getPrototypeOf(GamePuzzle).call(this, props));
 	  }
 	
 	  _createClass(GamePuzzle, [{
 	    key: 'componentWillMount',
-	    value: function componentWillMount() {
-	      _store2.default.dispatch({ type: 'PAGE_MOUNT' });
-	    }
+	    value: function componentWillMount() {}
 	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      console.log('component mounted with props', this.props);
 	      var _props$currentGame = this.props.currentGame;
 	      var blockSqRt = _props$currentGame.blockSqRt;
-	      var puzzleBlocks = _props$currentGame.puzzleBlocks;
 	      var numMovesAlreadyMade = _props$currentGame.numMovesAlreadyMade;
-	      var minNumMovesForWin = _props$currentGame.minNumMovesForWin;
+	
+	      var initialBoardDetails = this._setBoard(blockSqRt, numMovesAlreadyMade);
 	
 	      // update the state with the same parameters no matter what
-	
-	      _store2.default.dispatch((0, _gamePuzzleActions.setBoard)(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin));
+	      _store2.default.dispatch((0, _gamePuzzleActions.setBoard)(initialBoardDetails));
 	    }
 	
 	    // 1. for state - see componentDidMount
 	    // 2. for UI
 	
-	  }, {
-	    key: '_setPuzzle',
-	    value: function _setPuzzle(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-	
-	      return this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
-	    }
 	  }, {
 	    key: '_getRandomIdx',
 	    value: function _getRandomIdx(low, high) {
@@ -44898,65 +44904,6 @@
 	      }
 	
 	      return true;
-	    }
-	  }, {
-	    key: '_setInitialBoard',
-	    value: function _setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-	      var _this2 = this;
-	
-	      // console.log('blockSqRt', blockSqRt)
-	      // console.log('puzzleBlocks', puzzleBlocks)
-	      // console.log('numMovesAlreadyMade', numMovesAlreadyMade)
-	      // console.log('minNumMovesForWin', minNumMovesForWin)
-	      var totalNumberOfBlocks = blockSqRt * blockSqRt;
-	      var initialBoard = [].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
-	        return i + 1;
-	      });
-	
-	      // shuffle
-	      var shuffledBoard = this.shuffleBoard([].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
-	        return i + 1;
-	      }));
-	
-	      var arraysEqual = this._arraysEqual(initialBoard, shuffledBoard);
-	
-	      // if arrays are the same then call reshuffle
-	      if (arraysEqual) {
-	        console.log('arrays were the same');
-	        this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
-	      }
-	
-	      this.initialBoard = shuffledBoard;
-	      this.solvedBoard = initialBoard;
-	
-	      console.log('BOARD = ', initialBoard);
-	      console.log('Shuffled Board = ', shuffledBoard);
-	
-	      console.log('arrays equal = ', arraysEqual);
-	      var emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
-	
-	      console.log('Empty Block Value = ', emptyBlockValue);
-	      var type = "type-" + blockSqRt + "x" + blockSqRt;
-	
-	      var puzzleBoard = shuffledBoard.map(function (block, idx) {
-	        var id = void 0;
-	        if (block === emptyBlockValue) {
-	          id = "empty";
-	        } else {
-	          id = "block-" + (idx + 1);
-	        }
-	
-	        return _react2.default.createElement(_Block2.default, { className: "block " + type,
-	          id: id,
-	          key: block,
-	          value: block,
-	          type: type,
-	          onBlockClick: function onBlockClick(e) {
-	            return _this2._handleBlockClick(e);
-	          } });
-	      });
-	
-	      return puzzleBoard;
 	    }
 	
 	    // Fisher-Yates for more robust randomizing algo
@@ -44982,6 +44929,91 @@
 	      }
 	
 	      return array;
+	    }
+	  }, {
+	    key: '_setBoard',
+	    value: function _setBoard(blockSqRt, numMovesAlreadyMade) {
+	
+	      var totalNumberOfBlocks = blockSqRt * blockSqRt;
+	
+	      var shuffledBoard = this.shuffleBoard([].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
+	        return i + 1;
+	      }));
+	      var solvedBoard = [].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
+	        return i + 1;
+	      });
+	      var emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
+	
+	      var arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
+	
+	      if (arraysEqual) {
+	        this._setBoard(blockSqRt);
+	      }
+	
+	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade);
+	    }
+	  }, {
+	    key: '_prepareBoard',
+	    value: function _prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade) {
+	      var initialBoardData = void 0;
+	      var solvedAndSetBoard = void 0;
+	
+	      initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
+	      solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
+	      var _initialBoardData = initialBoardData;
+	      var initialBoard = _initialBoardData.initialBoard;
+	      var emptyBlockIdx = _initialBoardData.emptyBlockIdx;
+	
+	
+	      this.initialBoard = initialBoard;
+	      this.solvedBoard = solvedAndSetBoard;
+	
+	      return { solvedAndSetBoard: solvedAndSetBoard, initialBoard: initialBoard, emptyBlockIdx: emptyBlockIdx, emptyBlockValue: emptyBlockValue };
+	    }
+	  }, {
+	    key: '_prepareSolvedAndSetBoard',
+	    value: function _prepareSolvedAndSetBoard(board, value) {
+	      var b = void 0;
+	      var valueIdx = void 0;
+	
+	      b = board.map(function (el, idx) {
+	        if (el === value) {
+	          valueIdx = idx;
+	          return null;
+	        }
+	
+	        if (el > value) {
+	          return el - 1;
+	        } else {
+	          return el;
+	        }
+	      });
+	
+	      var emptyBlock = b.splice(valueIdx, 1);
+	      b.push(emptyBlock);
+	
+	      return b;
+	    }
+	  }, {
+	    key: '_prepareInitialBoard',
+	    value: function _prepareInitialBoard(board, value) {
+	      var initialBoard = void 0;
+	      var emptyBlockIdx = void 0;
+	
+	      initialBoard = board.map(function (el, idx) {
+	        if (el === value) {
+	          emptyBlockIdx = idx;
+	          return null;
+	        }
+	
+	        if (el > value) {
+	          return el - 1;
+	        } else {
+	          return el;
+	        }
+	      });
+	
+	      return { initialBoard: initialBoard, emptyBlockIdx: emptyBlockIdx };
 	    }
 	
 	    // check if move can be made
@@ -45019,26 +45051,43 @@
 	      } else {
 	        console.log('not empty ');
 	      }
-	
 	      // dispatch an event that triggers game board reinitialization
 	      _store2.default.dispatch((0, _gamePuzzleActions.blockClicked)(e.target));
 	    }
 	  }, {
-	    key: '_resetBoard',
-	    value: function _resetBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-	      throw new Error('Needs to be implemented');
-	    }
-	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _this2 = this;
+	
 	      console.log('render for game puzzle with props ', this.props);
 	      var _props$currentGame2 = this.props.currentGame;
 	      var blockSqRt = _props$currentGame2.blockSqRt;
-	      var puzzleBlocks = _props$currentGame2.puzzleBlocks;
-	      var numMovesAlreadyMade = _props$currentGame2.numMovesAlreadyMade;
+	      var currentBoard = _props$currentGame2.currentBoard;
+	      var emptyBlockIndex = _props$currentGame2.emptyBlockIndex;
 	      var minNumMovesForWin = _props$currentGame2.minNumMovesForWin;
 	
-	      var puzzle = this._setPuzzle(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
+	      var puzzleBlocks = [];
+	      var id = void 0;
+	      var type = "type-" + blockSqRt + "x" + blockSqRt;
+	
+	      currentBoard.forEach(function (block, idx) {
+	        console.log('block for current board = ', block);
+	        console.log('idx for current board = ', idx);
+	
+	        if (idx === emptyBlockIndex) {
+	          id = "empty";
+	        } else {
+	          id = "block-" + (idx + 1);
+	        }
+	
+	        puzzleBlocks.push(_react2.default.createElement(_Block2.default, { id: id,
+	          key: idx,
+	          type: type,
+	          value: block,
+	          onBlockClick: function onBlockClick(e) {
+	            return _this2._handleBlockClick(e);
+	          } }));
+	      });
 	
 	      return _react2.default.createElement(
 	        'section',
@@ -45046,7 +45095,7 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'puzzle-blocks' },
-	          puzzle
+	          puzzleBlocks
 	        )
 	      );
 	    }
@@ -45995,12 +46044,12 @@
 	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
-	function setBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
+	function setBoard(initialBoardDetails) {
 	  console.log('setBoard() action');
 	
 	  return {
 	    type: types.SET_BOARD,
-	    data: { blockSqRt: blockSqRt, puzzleBlocks: puzzleBlocks, numMovesAlreadyMade: numMovesAlreadyMade, minNumMovesForWin: minNumMovesForWin }
+	    data: { initialBoardDetails: initialBoardDetails }
 	  };
 	}
 	

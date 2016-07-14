@@ -17,29 +17,22 @@ class GamePuzzle extends React.Component {
   constructor (props) {
     super(props);
 
-    this.initialBoard = [];
-    this.solvedBoard = [];
-
   }
 
   componentWillMount () {
-    store.dispatch({type: 'PAGE_MOUNT'})
+
   }
 
   componentDidMount () {
-    console.log('component mounted with props', this.props)
-    const {blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin} = this.props.currentGame
+    const { blockSqRt, numMovesAlreadyMade } = this.props.currentGame;
+    const initialBoardDetails = this._setBoard(blockSqRt, numMovesAlreadyMade);
 
     // update the state with the same parameters no matter what
-    store.dispatch(setBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin));
+    store.dispatch(setBoard(initialBoardDetails));
   }
 
   // 1. for state - see componentDidMount
   // 2. for UI
-  _setPuzzle(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-
-    return this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
-  }
 
   _getRandomIdx (low, high) {
     return Math.floor(Math.random() * (high - low)) + low;
@@ -57,59 +50,6 @@ class GamePuzzle extends React.Component {
     }
 
     return true;
-  }
-
-  _setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-    // console.log('blockSqRt', blockSqRt)
-    // console.log('puzzleBlocks', puzzleBlocks)
-    // console.log('numMovesAlreadyMade', numMovesAlreadyMade)
-    // console.log('minNumMovesForWin', minNumMovesForWin)
-    let totalNumberOfBlocks = blockSqRt * blockSqRt;
-    let initialBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
-
-    // shuffle
-    let shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
-
-    let arraysEqual = this._arraysEqual(initialBoard, shuffledBoard);
-
-    // if arrays are the same then call reshuffle
-    if (arraysEqual) {
-      console.log('arrays were the same')
-      this._setInitialBoard(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin)
-    }
-
-    this.initialBoard = shuffledBoard;
-    this.solvedBoard = initialBoard;
-
-
-    console.log('BOARD = ', initialBoard)
-    console.log('Shuffled Board = ', shuffledBoard)
-
-    console.log('arrays equal = ', arraysEqual)
-    const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
-
-    console.log('Empty Block Value = ', emptyBlockValue)
-    const type = "type-" + blockSqRt + "x" + blockSqRt;
-
-    let puzzleBoard = shuffledBoard.map((block, idx) => {
-      let id;
-      if (block === emptyBlockValue) {
-        id = "empty";
-      } else {
-        id = "block-" + (idx + 1);
-      }
-
-      return (
-          <Block className={"block " + type}
-                 id={id}
-                 key={block}
-                 value={block}
-                 type={type}
-                 onBlockClick={(e) => this._handleBlockClick(e)}/>
-      )
-    });
-
-    return puzzleBoard;
   }
 
   // Fisher-Yates for more robust randomizing algo
@@ -134,12 +74,87 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
+  _setBoard(blockSqRt, numMovesAlreadyMade) {
+
+    let totalNumberOfBlocks = blockSqRt * blockSqRt;
+
+    const shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
+    const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
+    const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
+
+    const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
+
+    if (arraysEqual) {
+      this._setBoard(blockSqRt)
+    }
+
+    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade)
+  }
+
+  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade) {
+    let initialBoardData;
+    let solvedAndSetBoard;
+
+    initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
+    solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
+    const { initialBoard, emptyBlockIdx } = initialBoardData;
+
+    this.initialBoard = initialBoard;
+    this.solvedBoard = solvedAndSetBoard;
+
+    return {solvedAndSetBoard, initialBoard, emptyBlockIdx, emptyBlockValue };
+  }
+
+  _prepareSolvedAndSetBoard (board, value) {
+    let b;
+    let valueIdx;
+
+    b = board.map((el, idx) => {
+      if (el === value) {
+        valueIdx = idx;
+        return null
+      }
+
+      if (el > value) {
+        return el - 1
+      }
+      else {
+        return el
+      }
+
+    });
+
+    var emptyBlock = b.splice(valueIdx, 1)
+    b.push(emptyBlock);
+
+    return b
+  }
+  _prepareInitialBoard (board, value) {
+    let initialBoard;
+    let emptyBlockIdx;
+
+    initialBoard = board.map((el, idx) => {
+      if (el === value) {
+        emptyBlockIdx = idx;
+        return null
+      }
+
+      if (el > value) {
+        return el - 1
+      }
+      else {
+        return el
+      }
+
+    });
+
+    return { initialBoard, emptyBlockIdx }
+  }
+
   // check if move can be made
   // if move can be made, make move
   // if not don't do anything and log it to the user
   // after the move is made, check the board
-
-
   _handleBlockClick (e) {
     console.log('_handleBlockClick');
 
@@ -169,29 +184,42 @@ class GamePuzzle extends React.Component {
       console.log('not empty ')
 
     }
-
-
-
-
     // dispatch an event that triggers game board reinitialization
     store.dispatch(blockClicked(e.target))
   }
 
-  _resetBoard (blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin) {
-    throw new Error(
-      'Needs to be implemented'
-    )
-  }
 
   render () {
-    console.log('render for game puzzle with props ', this.props )
-    const {blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin} = this.props.currentGame
-    let puzzle = this._setPuzzle(blockSqRt, puzzleBlocks, numMovesAlreadyMade, minNumMovesForWin);
+    console.log('render for game puzzle with props ', this.props );
+    const {blockSqRt, currentBoard, emptyBlockIndex, minNumMovesForWin} = this.props.currentGame
+    let puzzleBlocks = [];
+    let id;
+    const type = "type-" + blockSqRt + "x" + blockSqRt;
+
+    currentBoard.forEach((block, idx) => {
+      console.log('block for current board = ', block)
+      console.log('idx for current board = ', idx)
+
+      if (idx === emptyBlockIndex) {
+        id = "empty"
+      } else {
+        id = "block-" + (idx + 1)
+      }
+
+      puzzleBlocks.push(
+        <Block id={id}
+        key={idx}
+        type={type}
+        value={block}
+        onBlockClick={(e) => this._handleBlockClick(e)}/>
+      )
+
+    });
 
     return (
       <section className="game-puzzle">
         <div className="puzzle-blocks">
-          {puzzle}
+          {puzzleBlocks}
         </div>
       </section>
     )
