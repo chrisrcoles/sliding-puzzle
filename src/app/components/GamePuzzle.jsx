@@ -24,8 +24,8 @@ class GamePuzzle extends React.Component {
   }
 
   componentDidMount () {
-    const { blockSqRt, numMovesAlreadyMade } = this.props.currentGame;
-    const initialBoardDetails = this._setBoard(blockSqRt, numMovesAlreadyMade);
+    const { boardWidth } = this.props.currentGame;
+    const initialBoardDetails = this._setBoard(boardWidth);
 
     // update the state with the same parameters no matter what
     store.dispatch(setBoard(initialBoardDetails));
@@ -74,9 +74,9 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
-  _setBoard(blockSqRt, numMovesAlreadyMade) {
+  _setBoard(boardWidth) {
 
-    let totalNumberOfBlocks = blockSqRt * blockSqRt;
+    let totalNumberOfBlocks = boardWidth * boardWidth;
 
     const shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
     const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
@@ -85,22 +85,42 @@ class GamePuzzle extends React.Component {
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
     if (arraysEqual) {
-      this._setBoard(blockSqRt)
+      this._setBoard(boardWidth)
     }
 
-    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade)
+    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth)
   }
 
-  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade) {
-    let initialBoardData;
-    let solvedAndSetBoard;
+  _prepareMultiDimensionalBoard(board, boardWidth) {
+    let multidimensionalBoard;
+    let arr1 = []
 
-    initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
-    solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
+    for (var b = 0; b < boardWidth; b++) {
+
+
+      let arr2 = new Array(boardWidth);
+
+      for (var j = 0; j < arr2.length; j++ ) {
+        arr2.push({x: 'hi', y: ''})
+      }
+
+
+      arr1.push(arr2)
+    }
+
+    console.log('prepareMultiDimensionalBoard = arr1 ', arr1)
+    console.log('prepareMultiDimensionalBoard = arr2 ', arr2)
+
+  }
+
+  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, boardWidth) {
+
+    let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
+    let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
+
     const { initialBoard, emptyBlockIdx } = initialBoardData;
 
-    this.initialBoard = initialBoard;
-    this.solvedBoard = solvedAndSetBoard;
+    let multidimensionalBoard = this._prepareMultiDimensionalBoard(initialBoard, boardWidth)
 
     return {solvedAndSetBoard, initialBoard, emptyBlockIdx, emptyBlockValue };
   }
@@ -129,6 +149,7 @@ class GamePuzzle extends React.Component {
 
     return b
   }
+
   _prepareInitialBoard (board, value) {
     let initialBoard;
     let emptyBlockIdx;
@@ -165,8 +186,8 @@ class GamePuzzle extends React.Component {
     let oldPosition = $(selectedBlockId);
     let newPosition = $('#empty');
 
-    let oldPositionClone = oldPosition.clone();
-    let newPositionClone = newPosition.clone();
+    let oldPositionClone = oldPosition.clone(true, true);
+    let newPositionClone = newPosition.clone(true, true);
 
     console.log('oldPosition Clone  =', oldPositionClone)
 
@@ -191,26 +212,26 @@ class GamePuzzle extends React.Component {
 
   render () {
     console.log('render for game puzzle with props ', this.props );
-    const {blockSqRt, currentBoard, emptyBlockIndex, minNumMovesForWin} = this.props.currentGame
+    const {boardWidth, currentBoard, emptyBlock, minNumMovesForWin} = this.props.currentGame
     let puzzleBlocks = [];
-    let id;
-    const type = "type-" + blockSqRt + "x" + blockSqRt;
+    let id, value;
+    const type = "type-" + boardWidth + "x" + boardWidth;
+
 
     currentBoard.forEach((block, idx) => {
-      console.log('block for current board = ', block)
-      console.log('idx for current board = ', idx)
-
-      if (idx === emptyBlockIndex) {
+      if (idx === emptyBlock.initialIndex) {
         id = "empty"
+        value = "."
       } else {
         id = "block-" + (idx + 1)
+        value = block
       }
 
       puzzleBlocks.push(
         <Block id={id}
         key={idx}
         type={type}
-        value={block}
+        value={value}
         onBlockClick={(e) => this._handleBlockClick(e)}/>
       )
 

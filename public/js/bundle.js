@@ -22789,7 +22789,7 @@
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	var initialState = {
-	  blockSqRt: 3,
+	  boardWidth: 3,
 	  initialBoard: [],
 	  currentBoard: [],
 	  solvedBoard: [],
@@ -22836,7 +22836,7 @@
 	      console.log('set board block clicked reducer called, ', action);
 	      // console.log('state = ', state)
 	      state = Object.assign({}, state, {
-	        blockSqRt: state.blockSqRt,
+	        boardWidth: state.boardWidth,
 	        numMovesAlreadyMade: state.numMovesAlreadyMade + 1
 	      });
 	      break;
@@ -44872,11 +44872,9 @@
 	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var _props$currentGame = this.props.currentGame;
-	      var blockSqRt = _props$currentGame.blockSqRt;
-	      var numMovesAlreadyMade = _props$currentGame.numMovesAlreadyMade;
+	      var boardWidth = this.props.currentGame.boardWidth;
 	
-	      var initialBoardDetails = this._setBoard(blockSqRt, numMovesAlreadyMade);
+	      var initialBoardDetails = this._setBoard(boardWidth);
 	
 	      // update the state with the same parameters no matter what
 	      _store2.default.dispatch((0, _gamePuzzleActions.setBoard)(initialBoardDetails));
@@ -44932,9 +44930,9 @@
 	    }
 	  }, {
 	    key: '_setBoard',
-	    value: function _setBoard(blockSqRt, numMovesAlreadyMade) {
+	    value: function _setBoard(boardWidth) {
 	
-	      var totalNumberOfBlocks = blockSqRt * blockSqRt;
+	      var totalNumberOfBlocks = boardWidth * boardWidth;
 	
 	      var shuffledBoard = this.shuffleBoard([].concat(_toConsumableArray(Array(totalNumberOfBlocks).keys())).map(function (i) {
 	        return i + 1;
@@ -44947,26 +44945,43 @@
 	      var arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 	
 	      if (arraysEqual) {
-	        this._setBoard(blockSqRt);
+	        this._setBoard(boardWidth);
 	      }
 	
-	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade);
+	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth);
+	    }
+	  }, {
+	    key: '_prepareMultiDimensionalBoard',
+	    value: function _prepareMultiDimensionalBoard(board, boardWidth) {
+	      var multidimensionalBoard = void 0;
+	      var arr1 = [];
+	
+	      for (var b = 0; b < boardWidth; b++) {
+	
+	        var _arr = new Array(boardWidth);
+	
+	        for (var j = 0; j < _arr.length; j++) {
+	          _arr.push({ x: 'hi', y: '' });
+	        }
+	
+	        arr1.push(_arr);
+	      }
+	
+	      console.log('prepareMultiDimensionalBoard = arr1 ', arr1);
+	      console.log('prepareMultiDimensionalBoard = arr2 ', arr2);
 	    }
 	  }, {
 	    key: '_prepareBoard',
-	    value: function _prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, numMovesAlreadyMade) {
-	      var initialBoardData = void 0;
-	      var solvedAndSetBoard = void 0;
+	    value: function _prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth) {
 	
-	      initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
-	      solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
-	      var _initialBoardData = initialBoardData;
-	      var initialBoard = _initialBoardData.initialBoard;
-	      var emptyBlockIdx = _initialBoardData.emptyBlockIdx;
+	      var initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
+	      var solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
+	
+	      var initialBoard = initialBoardData.initialBoard;
+	      var emptyBlockIdx = initialBoardData.emptyBlockIdx;
 	
 	
-	      this.initialBoard = initialBoard;
-	      this.solvedBoard = solvedAndSetBoard;
+	      var multidimensionalBoard = this._prepareMultiDimensionalBoard(initialBoard, boardWidth);
 	
 	      return { solvedAndSetBoard: solvedAndSetBoard, initialBoard: initialBoard, emptyBlockIdx: emptyBlockIdx, emptyBlockValue: emptyBlockValue };
 	    }
@@ -45033,8 +45048,8 @@
 	      var oldPosition = $(selectedBlockId);
 	      var newPosition = $('#empty');
 	
-	      var oldPositionClone = oldPosition.clone();
-	      var newPositionClone = newPosition.clone();
+	      var oldPositionClone = oldPosition.clone(true, true);
+	      var newPositionClone = newPosition.clone(true, true);
 	
 	      console.log('oldPosition Clone  =', oldPositionClone);
 	
@@ -45060,30 +45075,30 @@
 	      var _this2 = this;
 	
 	      console.log('render for game puzzle with props ', this.props);
-	      var _props$currentGame2 = this.props.currentGame;
-	      var blockSqRt = _props$currentGame2.blockSqRt;
-	      var currentBoard = _props$currentGame2.currentBoard;
-	      var emptyBlockIndex = _props$currentGame2.emptyBlockIndex;
-	      var minNumMovesForWin = _props$currentGame2.minNumMovesForWin;
+	      var _props$currentGame = this.props.currentGame;
+	      var boardWidth = _props$currentGame.boardWidth;
+	      var currentBoard = _props$currentGame.currentBoard;
+	      var emptyBlock = _props$currentGame.emptyBlock;
+	      var minNumMovesForWin = _props$currentGame.minNumMovesForWin;
 	
 	      var puzzleBlocks = [];
-	      var id = void 0;
-	      var type = "type-" + blockSqRt + "x" + blockSqRt;
+	      var id = void 0,
+	          value = void 0;
+	      var type = "type-" + boardWidth + "x" + boardWidth;
 	
 	      currentBoard.forEach(function (block, idx) {
-	        console.log('block for current board = ', block);
-	        console.log('idx for current board = ', idx);
-	
-	        if (idx === emptyBlockIndex) {
+	        if (idx === emptyBlock.initialIndex) {
 	          id = "empty";
+	          value = ".";
 	        } else {
 	          id = "block-" + (idx + 1);
+	          value = block;
 	        }
 	
 	        puzzleBlocks.push(_react2.default.createElement(_Block2.default, { id: id,
 	          key: idx,
 	          type: type,
-	          value: block,
+	          value: value,
 	          onBlockClick: function onBlockClick(e) {
 	            return _this2._handleBlockClick(e);
 	          } }));

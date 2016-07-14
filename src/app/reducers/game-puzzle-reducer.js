@@ -2,7 +2,7 @@ import * as types from '../actions/action-types';
 import _ from 'lodash';
 
 const initialState = {
-  blockSqRt: 3,
+  boardWidth: 3,
   initialBoard: [],
   currentBoard: [],
   solvedBoard: [],
@@ -46,7 +46,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
       console.log('set board block clicked reducer called, ', action)
       // console.log('state = ', state)
       state = Object.assign({}, state, {
-        blockSqRt: state.blockSqRt,
+        boardWidth: state.boardWidth,
         numMovesAlreadyMade: state.numMovesAlreadyMade + 1,
         // minNumMovesForWin: action.data.movesForWin
       });
