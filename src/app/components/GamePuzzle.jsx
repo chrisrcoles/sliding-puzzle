@@ -77,12 +77,22 @@ class GamePuzzle extends React.Component {
     const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
 
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
+    const boardSolvable = this._boardSolvable(shuffledBoard, boardWidth, boardHeight)
 
-    if (arraysEqual) {
+    if (arraysEqual && boardSolvable) {
       this._setBoard(boardWidth, boardHeight)
     }
 
     return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
+  }
+
+  _boardSolvable( board, width, height) {
+
+    console.log('board solvable, ', board)
+
+
+
+    return true
   }
 
   _getPositionalBoard(board, boardWidth) {
@@ -271,12 +281,7 @@ class GamePuzzle extends React.Component {
     return !emptyPosition.is(':empty')
   }
 
-  // check if move can be made
-  // if move can be made, make move
-  // if not don't do anything and log it to the user
-  // after the move is made, check the board
   _handleBlockClick (e) {
-    console.log('_handleBlockClick() called');
     const { boards } = this.props.currentGame;
     const positionalBoard =  boards.positionalBoard;
     const solvedBoard = boards.solvedBoard;
@@ -292,15 +297,11 @@ class GamePuzzle extends React.Component {
     const {positionCanBeMoved, emptyBlock, targetBlock} = this._checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition);
 
     if (!positionCanBeMoved) {
-      console.log('BLOCK CANNOT BE MOVED FOR SOME REASON PLEASE SEE ABOVE');
       store.dispatch(blockMoveNotAllowed({ targetPositionValue }));
       return
     }
 
-    this._replaceBlock(emptyPosition, targetPosition);
-
-    store.dispatch(blockMoved({ emptyBlock, targetBlock }))
-
+    store.dispatch(blockMoved({ emptyBlock, targetBlock }));
     this._checkIfPuzzleSolved(currentBoard, solvedBoard)
   }
 
@@ -310,21 +311,6 @@ class GamePuzzle extends React.Component {
     if (arraysEqual) {
       store.dispatch(puzzleSolved())
     }
-  }
-
-
-  _replaceBlock(emptyPosition, targetPosition) {
-    console.log('empty position = ', emptyPosition);
-    console.log('target position = ', targetPosition);
-
-    let oldPositionClone = targetPosition.clone(true);
-    let newPositionClone = emptyPosition.clone(true);
-
-    console.log('oldPosition Clone  =', oldPositionClone);
-    console.log('emptyPosition Clone  =', newPositionClone);
-
-    targetPosition.replaceWith(newPositionClone);
-    emptyPosition.replaceWith(oldPositionClone);
   }
 
 

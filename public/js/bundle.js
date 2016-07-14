@@ -45012,12 +45012,21 @@
 	      var emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
 	
 	      var arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
+	      var boardSolvable = this._boardSolvable(shuffledBoard, boardWidth, boardHeight);
 	
-	      if (arraysEqual) {
+	      if (arraysEqual && boardSolvable) {
 	        this._setBoard(boardWidth, boardHeight);
 	      }
 	
 	      return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight);
+	    }
+	  }, {
+	    key: '_boardSolvable',
+	    value: function _boardSolvable(board, width, height) {
+	
+	      console.log('board solvable, ', board);
+	
+	      return true;
 	    }
 	  }, {
 	    key: '_getPositionalBoard',
@@ -45217,16 +45226,9 @@
 	
 	      return !emptyPosition.is(':empty');
 	    }
-	
-	    // check if move can be made
-	    // if move can be made, make move
-	    // if not don't do anything and log it to the user
-	    // after the move is made, check the board
-	
 	  }, {
 	    key: '_handleBlockClick',
 	    value: function _handleBlockClick(e) {
-	      console.log('_handleBlockClick() called');
 	      var boards = this.props.currentGame.boards;
 	
 	      var positionalBoard = boards.positionalBoard;
@@ -45248,15 +45250,11 @@
 	
 	
 	      if (!positionCanBeMoved) {
-	        console.log('BLOCK CANNOT BE MOVED FOR SOME REASON PLEASE SEE ABOVE');
 	        _store2.default.dispatch((0, _gamePuzzleActions.blockMoveNotAllowed)({ targetPositionValue: targetPositionValue }));
 	        return;
 	      }
 	
-	      this._replaceBlock(emptyPosition, targetPosition);
-	
 	      _store2.default.dispatch((0, _gamePuzzleActions.blockMoved)({ emptyBlock: emptyBlock, targetBlock: targetBlock }));
-	
 	      this._checkIfPuzzleSolved(currentBoard, solvedBoard);
 	    }
 	  }, {
@@ -45267,21 +45265,6 @@
 	      if (arraysEqual) {
 	        _store2.default.dispatch((0, _gamePuzzleActions.puzzleSolved)());
 	      }
-	    }
-	  }, {
-	    key: '_replaceBlock',
-	    value: function _replaceBlock(emptyPosition, targetPosition) {
-	      console.log('empty position = ', emptyPosition);
-	      console.log('target position = ', targetPosition);
-	
-	      var oldPositionClone = targetPosition.clone(true);
-	      var newPositionClone = emptyPosition.clone(true);
-	
-	      console.log('oldPosition Clone  =', oldPositionClone);
-	      console.log('emptyPosition Clone  =', newPositionClone);
-	
-	      targetPosition.replaceWith(newPositionClone);
-	      emptyPosition.replaceWith(oldPositionClone);
 	    }
 	  }, {
 	    key: 'render',
