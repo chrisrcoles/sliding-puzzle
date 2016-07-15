@@ -31,9 +31,11 @@ const gamePuzzleReducer = function(state = initialState, action) {
       let boardDetails = action.data.boardDetails;
 
       if (!state.boards.initialBoard.length) {
+        console.log('initial board undefined')
         currentBoard = boardDetails.initialBoard
       } else {
-        currentBoard = state.currentBoard
+        console.log('inital board not undefined')
+        currentBoard = state.boards.currentBoard.slice()
       }
 
       state = Object.assign({}, state, {
@@ -65,9 +67,8 @@ const gamePuzzleReducer = function(state = initialState, action) {
 
     // re initialize state as empty
     case types.RESET_BOARD:
+      console.log('reset board reducer called!!', state)
       state = Object.assign({}, state, {
-        boardWidth: 3,
-        boardHeight: 3,
         emptyBlockIdx: null,
         boards: {
           initialBoard: [],
@@ -79,7 +80,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
         boardSolved: false
       });
       break;
-    
+
     case types.UPDATE_TIMER:
       state = Object.assign({}, state, {
         timer: {
@@ -90,7 +91,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
 
   }
 
-  
+
   return state;
 };
 

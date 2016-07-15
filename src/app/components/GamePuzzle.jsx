@@ -2,13 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Block from './Block';
 
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-
-// check if puzzle is solvable
-// if not solvable reinitialized new puzzle
-
-
-
 import store from '../store';
 import {
   setBoard,
@@ -36,27 +29,40 @@ class GamePuzzle extends React.Component {
 
   componentDidMount () {
     const { boardWidth, boardHeight } = this.props.currentGame;
+    const requestedReset = this.props.gameDetails.resetBoard;
     const boardDetails = this._setBoard(boardWidth, boardHeight);
     const start = this.props.timerStart;
-    console.log('props for tick = ', this.props.timerStart)
 
-    console.log('window = ', window)
+    const document = window.document;
+    const button = document.getElementById('reset');
 
-    this.intervalId = setInterval(() => {
+    let newDetails;
 
-      console.log('called ***!!')
-      const elapsed = new Date() - start;
+    button.addEventListener("click", () => {
+      console.log('clicked!')
 
-      store.dispatch(updateTimer({start, elapsed}))
-    }, 1000)
+      newDetails = this._setBoard(boardWidth, boardHeight)
+      store.dispatch(setBoard(newDetails))
+    });
+
+    // this.intervalId = setInterval(() => {
+    //
+    //   console.log('called ***!!')
+    //   const elapsed = new Date() - start;
+    //
+    //   store.dispatch(updateTimer({start, elapsed}))
+    // }, 1000)
     // update the state with the same parameters no matter what
+
+    console.log('called again!!!')
     store.dispatch(setBoard(boardDetails));
+
+
   }
 
   _tick (start) {
       const elapsed = new Date() - start;
 
-      console.log('tick called ', elapsed)
       store.dispatch(updateTimer({start, elapsed}))
   }
 
@@ -100,6 +106,7 @@ class GamePuzzle extends React.Component {
   }
 
   _setBoard(boardWidth, boardHeight) {
+    console.log('setBoard called()', boardWidth, boardHeight)
 
     let totalNumberOfBlocks = boardWidth * boardHeight;
 
@@ -107,11 +114,14 @@ class GamePuzzle extends React.Component {
     const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
     const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
 
+    console.log('shuffled board ', shuffledBoard)
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
     if (arraysEqual) {
       this._setBoard(boardWidth, boardHeight)
     }
+
+    console.log('GOT HERE 1')
 
     return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
   }
@@ -211,6 +221,7 @@ class GamePuzzle extends React.Component {
 
   _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight) {
 
+    console.log('_prepareBoard() called', this.props)
     let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
     let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
 
@@ -224,11 +235,13 @@ class GamePuzzle extends React.Component {
 
     // reset board if it's not solvable
     if (!boardSolvable) {
+      console.log('called again')
       store.dispatch(resetBoard())
       this._setBoard(boardWidth, boardHeight)
     }
 
-    return {initialBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue };
+    console.log('GOT HERE 1111222, ', emptyBlockIdx, emptyBlockValue)
+    return { initialBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue };
   }
 
   _boardRowOdd (board, height) {
@@ -346,9 +359,6 @@ class GamePuzzle extends React.Component {
       })
     });
 
-    console.log('target block = ', targetBlock)
-    console.log('empty block = ', emptyBlock)
-
     if (targetBlock.ref.y === emptyBlock.ref.y) {
       let max = Math.max(targetBlock.boardIdx, emptyBlock.boardIdx);
       let min = Math.min(targetBlock.boardIdx, emptyBlock.boardIdx);
@@ -365,15 +375,12 @@ class GamePuzzle extends React.Component {
       if (max - min === 1) {
         acceptableXPosition = true
       }
-
     }
 
     if (acceptableXPosition || acceptableYPosition) {
-      console.log('BLOCK CAN BE MOVED IS ADJACENT')
       adjacent = true;
       return {adjacent, emptyBlock, targetBlock }
     } else {
-      console.log('BLOCK CANNOT BE MOVED IS NOT ADJACENT')
       adjacent = false;
       return {adjacent, emptyBlock, targetBlock}
     }
@@ -395,13 +402,6 @@ class GamePuzzle extends React.Component {
   }
 
   _checkIfPositionCanBeMoved(emptyPosition) {
-    console.log(emptyPosition, 'emptyPosition')
-
-    if (!emptyPosition.is(':empty')) {
-      console.log('BLOCK CAN BE MOVED ', !emptyPosition.is(':empty'), ' IS EMPTY')
-    } else {
-      console.log('BLOCK CANNOT BE MOVED ', !emptyPosition.is(':empty'), ' IS NOT EMPTY')
-    }
 
     return !emptyPosition.is(':empty')
   }
@@ -414,16 +414,10 @@ class GamePuzzle extends React.Component {
 
     let target = "#" + e.target.id;
 
-    console.log('block value = ', $('.block-value'))
-
     let targetPosition = $(target);
     let emptyPosition = $('#empty');
 
-
     let targetPositionValue = targetPosition.text();
-
-    console.log('target position = ', targetPosition)
-    console.log('target position value = ', targetPositionValue)
 
     const {positionCanBeMoved, emptyBlock, targetBlock} = this._checkIfBlockCanBeMoved(targetPositionValue, positionalBoard, emptyPosition);
 
@@ -455,14 +449,20 @@ class GamePuzzle extends React.Component {
     const type = "type-" + boardWidth + "x" + boardHeight;
     let currentBoard = boards.currentBoard;
 
+
+
     currentBoard.forEach((block, idx) => {
-      if (idx === emptyBlockIdx) {
+      console.log('block = ', block)
+      console.log('empty Block idx = ', emptyBlockIdx)
+      if (!block) {
         id = "empty";
         value = "."
       } else {
         id = "block-" + (idx + 1);
         value = block
       }
+
+      console.log(' props for game puzzle ', this.props)
 
       puzzleBlocks.push(
         <Block id={id}
@@ -487,11 +487,10 @@ class GamePuzzle extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  // 2. map state to correct props
-  console.log('game puzzle map state to props with state', state)
 
   return {
-    currentGame: state.gamePuzzleState
+    currentGame: state.gamePuzzleState,
+    gameDetails: state.gameDetailsState
   }
 };
 

@@ -33,10 +33,11 @@ export function puzzleSolved () {
     type: types.PUZZLE_SOLVED,
     data: {}
   }
-  
+
 }
 
 export function resetBoard () {
+  console.log('reset board!!! action called')
   return {
     type: types.RESET_BOARD,
     data: {}

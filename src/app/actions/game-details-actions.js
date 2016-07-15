@@ -8,3 +8,19 @@ export function getBoardDetails () {
     data: {}
   };
 }
+
+export function resetBoard () {
+  
+  return {
+    type: types.RESET_BOARD_D,
+    data: {}
+  }
+}
+
+export function updateValue (input ) {
+  
+  return {
+    type: types.UPDATE_VALUE,
+    data: { input }
+  }
+}

@@ -6,3 +6,5 @@ export const PUZZLE_SOLVED = 'PUZZLED SOLVED';
 export const RESET_BOARD = 'RESET_BOARD';
 export const GET_BOARD_DETAILS = 'GET_BOARD_DETAILS';
 export const UPDATE_TIMER = 'UPDATE_TIMER';
+export const RESET_BOARD_D = 'RESET_BOARD_D'
+export const UPDATE_VALUE = 'UPDATE_VALUE';

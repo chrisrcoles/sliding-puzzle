@@ -19,22 +19,21 @@ class GameOptions extends React.Component {
 
   }
   componentWillUnmount() {}
-  render () {
-    const { movesMade, timerSeconds,
-      boardHeight, boardWidth } = this.props;
 
-    let time = "20 seconds";
+  render () {
+    const { movesMade, timerSeconds } = this.props;
     console.log('props for game options', this.props)
 
     return (
       <div className="game-options">
 
-        <button id="restart"
+        <button id="reset"
                 type="button">
-          <p id="restart-text">Reset</p>
+          <p id="reset-text">Reset</p>
         </button>
 
-        <button id="give-up"
+        <button onClick={(e) => this.props.handleGiveUp(e)}
+                id="give-up"
                 type="button">
           <p id="give-up-text">Give Up</p>
         </button>
@@ -43,7 +42,9 @@ class GameOptions extends React.Component {
                 action="" method="">
             <div>
               <label>Width:</label>
-              <input type="text" id="grid-width"/>
+              <input onChange={(e) => this.props.updateValue(e.target.value, 'width')}
+                      id="grid-width"
+                      type="text"/>
             </div>
           </form>
 
@@ -51,7 +52,9 @@ class GameOptions extends React.Component {
                 action="" method="">
             <div>
               <label>Height:</label>
-              <input type="text" id="grid-height"/>
+              <input onChange={(e) => this.props.updateValue(e.target.value, 'height')}
+                     id="grid-height"
+                     type="text"/>
             </div>
           </form>
 

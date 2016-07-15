@@ -10,7 +10,7 @@
     overflow: hidden;
   }
 
-  form, #restart, #give-up {
+  form, #reset, #give-up {
     float: left;
     position: relative;
     width: 40%;
@@ -57,7 +57,7 @@
     margin-top: 2rem
   }
 
-  #restart, #give-up {
+  #reset, #give-up {
     margin-left: 1rem;
     background-color: black;
     color: white;
@@ -74,7 +74,7 @@
 
   }
 
-  #restart-text {
+  #reset-text {
     margin-top: 0.6rem;
   }
 
