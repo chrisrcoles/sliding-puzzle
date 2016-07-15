@@ -1,8 +1,14 @@
 .game-details {
-  background: orange;
-  border: black 1px solid;
+  border: black 2px solid;
+  border-radius: 11px;
   width: 31%;
-  height: 720px;
+  height: 400px;
   margin: 20px 0 20px 20px;
   float: left;
+
+  h2 {
+    text-align: center;
+  }
+
 }
+

@@ -33,4 +33,19 @@ export function puzzleSolved () {
     type: types.PUZZLE_SOLVED,
     data: {}
   }
+  
+}
+
+export function resetBoard () {
+  return {
+    type: types.RESET_BOARD,
+    data: {}
+  }
+}
+
+export function updateTimer ( timer ) {
+  return {
+    type: types.UPDATE_TIMER,
+    data: { timer }
+  }
 }

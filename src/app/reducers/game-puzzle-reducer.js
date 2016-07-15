@@ -11,6 +11,10 @@ const initialState = {
     solvedBoard: [],
     positionalBoard: []
   },
+  timer: {
+    start: null,
+    elapsed: 0
+  },
   numMovesAlreadyMade: 0,
   boardSolved: false
 };
@@ -57,13 +61,38 @@ const gamePuzzleReducer = function(state = initialState, action) {
       state = Object.assign({}, state, {
         boardSolved: true
       })
+      break;
+
+    // re initialize state as empty
+    case types.RESET_BOARD:
+      state = Object.assign({}, state, {
+        boardWidth: 3,
+        boardHeight: 3,
+        emptyBlockIdx: null,
+        boards: {
+          initialBoard: [],
+          currentBoard: [],
+          solvedBoard: [],
+          positionalBoard: []
+        },
+        numMovesAlreadyMade: 0,
+        boardSolved: false
+      });
+      break;
+    
+    case types.UPDATE_TIMER:
+      state = Object.assign({}, state, {
+        timer: {
+          start: action.data.timer.start,
+          elapsed: action.data.timer.elapsed
+        }
+      })
 
   }
 
-  console.log('set state = ', state);
+  
   return state;
-
-}
+};
 
 const _getStateForBlockMoved = function (state, action) {
   const { targetBlock, emptyBlock } = action.data.blocks;

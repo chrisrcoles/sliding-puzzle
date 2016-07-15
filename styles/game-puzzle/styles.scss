@@ -1,6 +1,7 @@
 .game-puzzle {
   //background-color: blue;
-  border: black 1px solid;
+  border: black 2px solid;
+  border-radius: 11px;
   width: 63%;
   height: 720px;
   margin: 20px 0px 20px 20px;
@@ -21,4 +22,8 @@
   #block-4 {
     //background-color: yellow;
   }
+}
+
+.game-puzzle.type-3x3 {
+  height: 365px;
 }

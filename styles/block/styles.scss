@@ -15,6 +15,18 @@
 }
 
 #empty {
-  background-color: grey;
+  //background-color: grey;
+}
+
+.block {
+  z-index: 2;
+}
+
+.block-value {
+  font-size: 3rem;
+  text-align: center;
+  width: 1rem;
+  margin-left: 5rem;
+  margin-top: 2rem;
 }
 

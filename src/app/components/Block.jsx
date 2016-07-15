@@ -34,7 +34,9 @@ class Block extends React.Component {
            id={id}
            style={style}
            onClick={(e) => this.props.onBlockClick(e)}>
-        {value}
+        <div className="block-value">
+          {value}
+        </div>
 
       </div>
     )

@@ -17,7 +17,7 @@ class Layout extends React.Component {
         Classic Puzzle Game
 
         <div>
-          <GamePuzzle />
+          <GamePuzzle timerStart={Date.now()}/>
           <GameDetails />
         </div>
 
