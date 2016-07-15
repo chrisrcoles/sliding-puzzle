@@ -73,26 +73,16 @@ class GamePuzzle extends React.Component {
 
       } else  {
         newDetails = this._setBoard(parsedWidth, parsedHeight)
-        console.log('new details = ', newDetails)
-
-        // store.dispatch(resetBoard())
         store.dispatch(setBoard(newDetails))
       }
     });
 
     // this.intervalId = setInterval(() => {
-    //
-    //   console.log('called ***!!')
     //   const elapsed = new Date() - start;
-    //
     //   store.dispatch(updateTimer({start, elapsed}))
-    // }, 1000)
-    // update the state with the same parameters no matter what
+    // }, 1000);
 
-    console.log('called again!!!')
     store.dispatch(setBoard(boardDetails));
-
-
   }
 
   _tick (start) {
