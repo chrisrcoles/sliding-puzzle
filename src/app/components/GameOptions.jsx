@@ -1,5 +1,4 @@
 import React from 'react';
-import store from '../store';
 
 class GameOptions extends React.Component {
 
@@ -21,7 +20,7 @@ class GameOptions extends React.Component {
   componentWillUnmount() {}
 
   render () {
-    const { movesMade, timerSeconds } = this.props;
+    const { movesMade, timerSeconds, message } = this.props;
     console.log('props for game options', this.props)
 
     return (
@@ -42,9 +41,8 @@ class GameOptions extends React.Component {
                 action="" method="">
             <div>
               <label>Width:</label>
-              <input onChange={(e) => this.props.updateValue(e.target.value, 'width')}
-                      id="grid-width"
-                      type="text"/>
+              <input id="grid-width"
+                     type="text"/>
             </div>
           </form>
 
@@ -52,14 +50,17 @@ class GameOptions extends React.Component {
                 action="" method="">
             <div>
               <label>Height:</label>
-              <input onChange={(e) => this.props.updateValue(e.target.value, 'height')}
-                     id="grid-height"
+              <input id="grid-height"
                      type="text"/>
             </div>
           </form>
 
         <div id="moves-made">
-          <p>&#35; Moves Made:</p>{movesMade}
+          &#35; Moves Made: {movesMade}
+        </div>
+
+        <div id="status-message">
+          {message}
         </div>
 
         <div id="timer"

@@ -3,7 +3,7 @@
   border: black 2px solid;
   border-radius: 11px;
   width: 63%;
-  height: 720px;
+  height: 28rem;
   margin: 20px 0px 20px 20px;
   float: left;
 
@@ -25,5 +25,13 @@
 }
 
 .game-puzzle.type-3x3 {
-  height: 365px;
+  height: 28.7rem;
+}
+
+.game-puzzle.type-4x4 {
+  height: 34.6rem;
+}
+
+.game-puzzle.type-5x5 {
+  height: 38rem;
 }

@@ -4,6 +4,8 @@ import _ from 'lodash';
 const initialState = {
   boardWidth: 3,
   boardHeight: 3,
+  maxHeight: 5,
+  maxWidth: 5,
   emptyBlockIdx: null,
   boards: {
     initialBoard: [],
@@ -16,27 +18,29 @@ const initialState = {
     elapsed: 0
   },
   numMovesAlreadyMade: 0,
-  boardSolved: false
+  boardSolved: false,
+  error: null
 };
 
 const gamePuzzleReducer = function(state = initialState, action) {
 
   console.log('Game Puzzle Reducer() ');
-  console.log('incoming action = ', action);
+  console.log('hey')
+  console.log('incoming aØction = ', action);
 
   switch(action.type) {
 
     case types.SET_BOARD:
-      let currentBoard;
       let boardDetails = action.data.boardDetails;
 
-      if (!state.boards.initialBoard.length) {
-        console.log('initial board undefined')
-        currentBoard = boardDetails.initialBoard
-      } else {
-        console.log('inital board not undefined')
-        currentBoard = state.boards.currentBoard.slice()
-      }
+      console.log('state board width ', state.boardWidth)
+      console.log('width = ', action.data.boardWidth)
+
+      let width = action.data.boardDetails.boardWidth ? action.data.boardDetails.boardWidth : state.boardWidth;
+      let height = action.data.boardDetails.boardHeight ? action.data.boardDetails.boardHeight : state.boardHeight;
+
+      console.log('width in action ', width)
+      console.log('height in action ', height)
 
       state = Object.assign({}, state, {
         numMovesAlreadyMade: 0,
@@ -45,10 +49,23 @@ const gamePuzzleReducer = function(state = initialState, action) {
           initialBoard: boardDetails.initialBoard,
           solvedBoard: boardDetails.solvedAndSetBoard,
           positionalBoard: boardDetails.positionalBoard,
-          currentBoard: currentBoard
-        }
+          currentBoard: boardDetails.currentBoard
+        },
+        boardWidth: width,
+        boardHeight: height
       });
       break;
+
+    case types.UPDATE_VALUE:
+      const input = action.data.input;
+
+      const value = input.value;
+      const type = input.type;
+
+      let boardWidth = (type === "boardWidth") ? value : state.width;
+      let boardHeight = (type === "boardHeight") ? value : state.height;
+
+      return Object.assign({}, state, { boardWidth, boardHeight });
 
     case types.BLOCK_MOVED:
       state = _getStateForBlockMoved(state, action);
@@ -77,7 +94,8 @@ const gamePuzzleReducer = function(state = initialState, action) {
           positionalBoard: []
         },
         numMovesAlreadyMade: 0,
-        boardSolved: false
+        boardSolved: false,
+        error: null
       });
       break;
 
@@ -88,6 +106,15 @@ const gamePuzzleReducer = function(state = initialState, action) {
           elapsed: action.data.timer.elapsed
         }
       })
+      break;
+
+    case types.ALERT_CLIENT_ERROR:
+      console.log('action data error ', action.data.error);
+      const error = action.data.error
+      state = Object.assign({}, state, {
+        error: error
+      });
+      break;
 
   }
 

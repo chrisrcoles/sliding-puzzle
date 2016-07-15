@@ -50,3 +50,19 @@ export function updateTimer ( timer ) {
     data: { timer }
   }
 }
+
+export function updateValue (input) {
+
+  return {
+    type: types.UPDATE_VALUE,
+    data: {input}
+  }
+}
+
+export function alertClientError (error) {
+  
+  return {
+    type: types.ALERT_CLIENT_ERROR,
+    data: {error}
+  }
+}

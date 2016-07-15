@@ -9,7 +9,8 @@ import {
   blockMoveNotAllowed,
   puzzleSolved,
   resetBoard,
-  updateTimer
+  updateTimer,
+  alertClientError
 } from '../actions/game-puzzle-actions';
 
 class GamePuzzle extends React.Component {
@@ -28,7 +29,7 @@ class GamePuzzle extends React.Component {
   }
 
   componentDidMount () {
-    const { boardWidth, boardHeight } = this.props.currentGame;
+    const { boardWidth, boardHeight, maxWidth, maxHeight } = this.props.currentGame;
     const requestedReset = this.props.gameDetails.resetBoard;
     const boardDetails = this._setBoard(boardWidth, boardHeight);
     const start = this.props.timerStart;
@@ -41,8 +42,42 @@ class GamePuzzle extends React.Component {
     button.addEventListener("click", () => {
       console.log('clicked!')
 
-      newDetails = this._setBoard(boardWidth, boardHeight)
-      store.dispatch(setBoard(newDetails))
+      let height = $('#grid-height').val();
+      let width = $('#grid-width').val();
+      let parsedWidth = parseInt(width, 10);
+      let parsedHeight = parseInt(height, 10);
+      let acceptableWidth = (1 <= parsedWidth && parsedWidth > maxWidth + 1);
+      let acceptableHeight = (1 <= parsedHeight && parsedHeight > maxHeight + 1);
+      let bothAcceptable = (acceptableWidth && acceptableHeight)
+
+     if (acceptableWidth) {
+        console.log('height not in range')
+        let heightError = {
+          type: '_invalid_height',
+          code: 91,
+          msg: 'Height is out of range. Make sure height is in between 1 and 5.'
+        };
+
+        store.dispatch( alertClientError(heightError))
+        return
+
+      } else if (acceptableHeight) {
+        console.log('width not in range')
+        let widthError = {
+          type: '_invalid_width',
+          code: 81,
+          msg: 'Width is out of range. Make sure width is in between 1 and 5.'
+        };
+        store.dispatch( alertClientError(widthError))
+        return
+
+      } else  {
+        newDetails = this._setBoard(parsedWidth, parsedHeight)
+        console.log('new details = ', newDetails)
+
+        // store.dispatch(resetBoard())
+        store.dispatch(setBoard(newDetails))
+      }
     });
 
     // this.intervalId = setInterval(() => {
@@ -229,6 +264,8 @@ class GamePuzzle extends React.Component {
 
     const { initialBoard, emptyBlockIdx } = initialBoardData;
 
+    const currentBoard = initialBoard;
+
     let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
 
     const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard);
@@ -241,7 +278,7 @@ class GamePuzzle extends React.Component {
     }
 
     console.log('GOT HERE 1111222, ', emptyBlockIdx, emptyBlockValue)
-    return { initialBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue };
+    return { initialBoard, currentBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue, boardWidth, boardHeight };
   }
 
   _boardRowOdd (board, height) {

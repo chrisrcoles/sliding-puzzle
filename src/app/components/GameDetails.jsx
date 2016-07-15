@@ -3,14 +3,19 @@ import React from 'react';
 
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import GameOptions from './GameOptions';
+import GameStatus from './GameStatus';
+
 import store from '../store';
 import {connect} from 'react-redux';
 
 import {
-  getBoardDetails,
-  resetBoard,
-  updateValue
+  resetBoard
 } from '../actions/game-details-actions';
+
+import {
+  updateValue
+} from '../actions/game-puzzle-actions';
+
 class GameDetails extends React.Component {
 
   constructor (props) {
@@ -18,59 +23,48 @@ class GameDetails extends React.Component {
 
   }
 
-  componentDidMount() {
-    store.dispatch(getBoardDetails())
-  }
+  componentDidMount() {}
 
   _handleGiveUp (e) {
-    console.log('_handleGiveUp()')
     e.preventDefault();
-
     location.reload();
   }
 
-  _updateValue (value, type) {
-    console.log(
-      'update value!!', value
-    )
-    
-    store.dispatch(updateValue({value, type}))
-
-  }
 
   _handleReset(e) {
-    console.log('_handleReset()')
     const document = window.document;
-    const button = document.getElementById('reset')
-    // const event = new Event('click');
-    
+    const button = document.getElementById('reset');
     store.dispatch(resetBoard())
     button.dispatchEvent('click')
   }
 
   render () {
-
-    const {numMovesAlreadyMade, timer, boardHeight, boardWidth} = this.props.currentGame;
-    console.log('store props in details = ', this.props);
+    const {numMovesAlreadyMade, timer, boardHeight, boardWidth, error} = this.props.currentGame;
     let start = timer.start;
     let elapsed = timer.elapsed;
     let _elapsed = Math.round(elapsed / 100);
 
-
     // This will give a number with one digit after the decimal dot (xx.x):
     const seconds = (_elapsed / 10).toFixed(1);
+    let message;
+
+    message = error ? error.msg : 'Keep Playing!'
+
 
     return (
       <section className="game-details">
-        <h2>Sliding Puzzle</h2>
 
-        <GameOptions handleReset={this._handleReset}
-                     handleGiveUp={this._handleGiveUp}
-                     updateValue={this._updateValue}
-                     movesMade={numMovesAlreadyMade}
-                     timerSeconds={seconds}
-                     boardHeight={boardHeight}
-                     boardWidth={boardWidth}/>
+        <div className="game-details-container">
+          <GameStatus />
+          <GameOptions message={message}
+                       handleReset={this._handleReset}
+                       handleGiveUp={this._handleGiveUp}
+                       movesMade={numMovesAlreadyMade}
+                       timerSeconds={seconds}
+                       boardHeight={boardHeight}
+                       boardWidth={boardWidth}/>
+        </div>
+
       </section>
     )
   }
@@ -79,8 +73,6 @@ class GameDetails extends React.Component {
 
 
 const mapStateToProps = (state) => {
-  // 2. map state to correct props
-  console.log('map state to props with state', state)
   return {
     gameDetails: state.gameDetailsState,
     currentGame: state.gamePuzzleState
