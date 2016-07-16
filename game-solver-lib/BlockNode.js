@@ -1,8 +1,11 @@
 'use strict';
 
 class BlockNode {
-  constructor() {
-
+  constructor(cost, nodeNumber, board, pointer) {
+    this.cost = cost;
+    this.nodeNumber = nodeNumber;
+    this.board = board;
+    this.pointer = pointer;
   }
 
   // Game Nodes
