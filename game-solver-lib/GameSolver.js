@@ -15,6 +15,8 @@ class GameSolver {
     console.log('solve()');
 
     let nodeNumber = 1;
+    let count = 0;
+    let solutionFound = false;
     let queue = this._queue;
     let Board = this._board;
 
@@ -22,22 +24,45 @@ class GameSolver {
     let solutionBoardConfig = Board._solutionBoard;
 
     let originNodePointer = null;
+    let originNodeCost = Board.calculateCost(originalBoardConfig, nodeNumber);
 
-    // let val = Board.calculateManhattanDistance(1, 2);
-    // console.log('val = ', val)
+    console.log('cost = ', originNodeCost)
 
-    let originNode = new BlockNode(
-      Board.calculateCost(originalBoardConfig, 0, nodeNumber),
-      nodeNumber,
-      originalBoardConfig,
-      originNodePointer
-    );
+    // console.log('cost == ', originNodeCost)
+    //
+    // let originNode = new BlockNode(
+    //   originNodeCost,
+    //   nodeNumber,
+    //   originalBoardConfig,
+    //   originNodePointer
+    // );
+    //
+    // queue.enqueue(originNode);
+    // this._checked[originNode] = true;
+    // this._solve(nodeNumber, count, solutionFound)
+  }
 
-    // console.log('origin node = ', originNode)
+  _solve(nodeNumber, count, solutionFound) {
+    let queue = this._queue;
 
+    if (solutionFound) {
+      console.log('STOP');
+      return
+    }
+
+    if (!queue._elements.length) {
+      console.log('no more elements found');
+      return
+    }
+
+    let element = queue.dequeue();
+
+    console.log('element = ', element)
 
 
   }
+
+
 }
 
 module.exports = GameSolver;

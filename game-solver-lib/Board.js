@@ -12,17 +12,15 @@ const PriorityQueue = require('./PriorityQueue.js');
 // queue.peek(); // { cash: 300, name: 'Jano' }
 // queue.dequeue(); // { cash: 300, name: 'Jano' }
 // queue.size(); // 2
-
 const BlockNode = require('./BlockNode.js');
 
 class Board {
-  constructor (board, solution, emptyIndex) {
+  constructor (board, solution) {
     Board.validateBoard(board);
 
     this._originalBoard = this.createBoard(board);
     this._solutionBoard = this.createBoard(solution);
 
-    this._emptyIndex = emptyIndex;
     this._distances = [];
   }
 
@@ -40,24 +38,22 @@ class Board {
   //  1. past - number of moves made so far
   //  2. future - an estimate of the moves needed
   //    to complete the puzzle
-  calculateCost (board, depth, number) {
+  calculateCost (board, depth) {
     let futureCost = 0;
     let pastCost = depth;
     let num, solutionPosition;
 
     for (num = 0; num < board.length; num++) {
       let tile = board[num];
+      console.log('occupant = ', tile)
 
       if (tile != '_') {
         solutionPosition = this._solutionBoard.indexOf(tile);
-
-        futureCost += this.calculateManhattanDistance(tile, solutionPosition)
-
+        futureCost += this.calculateManhattanDistance(num, solutionPosition)
       }
-
     }
 
-    return pastCost + futureCost
+    return pastCost + futureCost * 3
   }
 
   // => returns the number of empty slots and
@@ -72,38 +68,40 @@ class Board {
 
   }
 
-  calculateManhattanDistance(pointA, pointB) {
-    console.log('calculateManhattanDistance() ',
-                'point a = ', pointA,
-                'point b = ', pointB)
-
+  // calculates manhattan distance between two points
+  calculateManhattanDistance (pointA, pointB) {
     let boardLength = this._originalBoard.length;
     let boardSquareRoot = Math.sqrt(boardLength);
-    let aInt, bInt, aRow, aCol, bRow, bCol;
-    let distance;
     let desiredDistance;
 
-    for (var _a in [...Array(boardLength).keys()]) {
-      for (var _b in [...Array(boardLength)]) {
-        let a = parseInt(_a, 10);
-        let b = parseInt(_b, 10);
-        aRow = Math.floor(a / boardSquareRoot), aCol = Math.round(a % boardSquareRoot);
-        bRow = Math.floor(b / boardSquareRoot), bCol = Math.round(b % boardSquareRoot);
-        distance = Math.abs(aRow - bRow) + Math.abs(aCol - bCol);
-        let coordinates = { distance, a, b};
-        this._distances.push(coordinates)
+    console.log('calculateManhattanDistance()', pointA, pointB)
+
+    for (var aa in [...Array(boardLength).keys()]) {
+
+      for (var bb in [...Array(boardLength).keys()]) {
+        aa = parseInt(aa, 10)
+        bb = parseInt(bb, 10)
+        var arow = Math.floor(aa / boardSquareRoot);
+        var brow = Math.floor(bb / boardSquareRoot);
+
+        var acol = Math.floor(aa % boardSquareRoot);
+        var bcol = Math.floor(bb % boardSquareRoot);
+
+        var distance = Math.abs(arow - brow) + Math.abs(acol - bcol);
+
+        var o = {distance, aa, bb};
+        this._distances.push(o)
       }
+
     }
 
     this._distances.forEach(distance => {
-      if (distance.a == pointA && distance.b == pointB) {
+      if (distance.aa == pointA && distance.bb == pointB) {
         desiredDistance = distance.distance
       }
     });
 
-    console.log('desired distance = ', desiredDistance)
-
-    return desiredDistance;
+    return desiredDistance
   }
 
 
