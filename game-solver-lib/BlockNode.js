@@ -1,11 +1,12 @@
 'use strict';
 
 class BlockNode {
-  constructor(cost, nodeNumber, board, pointer) {
+  constructor(cost, nodeNumber, board, pointer, grandFatherNode) {
     this.cost = cost;
     this.nodeNumber = nodeNumber;
     this.board = board;
     this.pointer = pointer;
+    this.grandFatherNode = grandFatherNode;
   }
 
   // Game Nodes
@@ -15,7 +16,7 @@ class BlockNode {
   // 2. number of this node, i.e., the order it was created
   // 3. the nine character tile configuration of the board
   // 4. a pointer to the parent node of this node
-  // order is important
+  // order is important'
 
 }
 
