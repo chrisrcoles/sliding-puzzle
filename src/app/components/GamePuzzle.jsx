@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import Block from './Block';
 
 import store from '../store';
+import test from '../lib/test';
+import PriorityQueue from '../lib/PriorityQueue';
+
 import {
   setBoard,
   blockMoved,
@@ -20,9 +23,7 @@ class GamePuzzle extends React.Component {
 
   }
 
-  componentWillMount () {
-
-  }
+  componentWillMount () {}
 
   componentWillUnmount() {
     window.clearInterval(this.intervalId);
