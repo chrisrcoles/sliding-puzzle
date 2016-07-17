@@ -35,13 +35,14 @@ class GameSolver {
     return this._queue
   }
 
-  solve(callback) {
+  solve() {
     let nodeNumber = 1;
     let totalCount = 0;
     let grandFatherNode = null;
     let solutionFound = false;
     let Queue = this._queue;
     let Board = this._board;
+    let moves = [];
 
     let originalBoardConfig = Board._originalBoard;
 
@@ -60,16 +61,22 @@ class GameSolver {
 
     this._checked[originNode.board] = true;
 
-    this._solve(nodeNumber, totalCount, solutionFound, null, (err, solution) => {
-      var moves = [];
-      this._solvePuzzle(solution, moves, (moves) => {
-        callback(moves)
-      });
-    })
-    
-    
-    
-
+    return new Promise((resolve, reject) => {
+      this._solve(nodeNumber, 
+                  totalCount, 
+                  solutionFound, 
+                  null, 
+                  (err, solution) => {
+                    if (err) {
+                      reject(err)
+                    }
+                    this._solvePuzzle(solution, 
+                                      moves,
+                                      (boardMoves) => {
+                                        resolve(boardMoves)
+                                      })
+                  })
+    });
   }
 
   _solvePuzzle(solution, moves, cb) {
@@ -93,6 +100,7 @@ class GameSolver {
 
   //
   _solve(nodeNumber, count, solutionFound, solution, cb) {
+    console.log('_solve() called')
     let Queue = this._queue;
     let Board = this._board;
     console.log('queue length  ', Queue.size())
