@@ -1,20 +1,17 @@
 import React from 'react';
 
-
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import GameOptions from './GameOptions';
 import GameStatus from './GameStatus';
 
 import store from '../store';
 import {connect} from 'react-redux';
 
-import {
-  resetBoard
-} from '../actions/game-details-actions';
+import GameSolver from '../game-solver-lib/GameSolver';
 
 import {
-  updateValue
-} from '../actions/game-puzzle-actions';
+  resetBoard,
+  requestHint
+} from '../actions/game-details-actions';
 
 class GameDetails extends React.Component {
 
@@ -38,8 +35,27 @@ class GameDetails extends React.Component {
     button.dispatchEvent('click')
   }
 
+  _handleHintRequest(e, gameData) {
+    store.dispatch(requestHint());
+    // console.log('_handleHintRequest()', GameSolver);
+
+  }
+
   render () {
-    const {numMovesAlreadyMade, timer, boardHeight, boardWidth, error} = this.props.currentGame;
+    const {
+      numMovesAlreadyMade, timer, boardHeight, boardWidth,
+      error, boards
+    } = this.props.currentGame;
+
+    // const {
+    //   currentBoard, solvedBoard, positionalBoard
+    // } = boards;
+
+    // const gameData = {
+    //   currentBoard, solvedBoard, positionalBoard, boardWidth, boardHeight
+    // };
+
+
     let elapsed = timer.elapsed;
     let _elapsed = Math.round(elapsed / 100);
 
@@ -56,6 +72,7 @@ class GameDetails extends React.Component {
         <div className="game-details-container">
           <GameStatus />
           <GameOptions message={message}
+                       handleHintRequest={this._handleHintRequest}
                        handleReset={this._handleReset}
                        handleGiveUp={this._handleGiveUp}
                        movesMade={numMovesAlreadyMade}

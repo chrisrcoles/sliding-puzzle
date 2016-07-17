@@ -35,6 +35,7 @@
     overflow: hidden;
   }
 
+
   #moves-made {
     float: left;
     position: relative;
@@ -75,7 +76,7 @@
     margin-top: 2rem
   }
 
-  #reset, #give-up {
+  #reset, #give-up, #hint {
     margin-left: 1rem;
     background-color: black;
     color: white;
@@ -90,6 +91,34 @@
     transition: all 0.2s ease-in-out;
     height: 3rem
 
+  }
+
+  #hint {
+    float: left;
+    position: relative;
+    width: 90%;
+    padding-bottom: 7%;
+    margin: 1%;
+    left: 1rem;
+    overflow: hidden;
+    margin-left: 0;
+  }
+
+  #shortest-num-moves,
+  #next-best-move {
+    float: left;
+    position: relative;
+    width: 60%;
+    padding-bottom: 7%;
+    margin: 1%;
+    left: 1rem;
+    overflow: hidden;
+    margin-left: 0;
+  }
+
+  #get-hint {
+    margin-left: 0;
+    margin-top: 0.6rem;
   }
 
   #reset-text {

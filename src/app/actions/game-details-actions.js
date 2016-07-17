@@ -17,10 +17,10 @@ export function resetBoard () {
   }
 }
 
-export function updateValue (input ) {
-  
+
+export function requestHint () {
   return {
-    type: types.UPDATE_VALUE,
-    data: { input }
+    type: types.REQUEST_HINT,
+    data: {}
   }
 }

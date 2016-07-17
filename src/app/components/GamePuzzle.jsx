@@ -4,8 +4,6 @@ import Block from './Block';
 
 import store from '../store';
 
-import GameSolver from '../game-solver-lib/GameSolver';
-
 import {
   setBoard,
   blockMoved,
@@ -23,9 +21,7 @@ class GamePuzzle extends React.Component {
 
   }
 
-  componentWillMount () {
-    console.log('game solver in game puzzle ', GameSolver)
-  }
+  componentWillMount () {}
 
   componentWillUnmount() {
     window.clearInterval(this.intervalId);

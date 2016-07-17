@@ -9,3 +9,4 @@ export const UPDATE_TIMER = 'UPDATE_TIMER';
 export const RESET_BOARD_D = 'RESET_BOARD_D'
 export const UPDATE_VALUE = 'UPDATE_VALUE';
 export const ALERT_CLIENT_ERROR = 'ALERT_CLIENT_ERROR';
+export const REQUEST_HINT = 'REQUEST_HINT';
