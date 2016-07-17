@@ -61,7 +61,6 @@ class Board {
 
     for (num = 0; num < board.length; num++) {
       let tile = board[num];
-      console.log('occupant = ', tile)
 
       if (tile != '_') {
         solutionPosition = this._solutionBoard.indexOf(tile);
@@ -81,27 +80,27 @@ class Board {
   }
 
   _getAllowedMoves (node, empty) {
-    console.log('NODE = ', node);
-    console.log('EMPTY = ', empty);
-    console.log('POSITIONAL BOARD = ', this._positionalBoard);
+    // console.log('NODE = ', node);
+    // console.log('EMPTY = ', empty);
+    // console.log('POSITIONAL BOARD = ', this._positionalBoard);
 
     let positionalBoard = this._positionalBoard.slice();
     let emptyPosition = positionalBoard[empty];
 
     const allowedMoves =  positionalBoard.filter((position, index) => {
-      return this._blockMovable(emptyPosition, empty, position, index)
+      return this._getBlockMoves(emptyPosition, empty, position, index)
     });
 
-    console.log('allowed moves = ', allowedMoves)
+    // console.log('allowed moves = ', allowedMoves)
 
     return allowedMoves;
   }
 
-  _blockMovable(empty, emptyIndex, position, positionIndex) {
-    console.log('empty ', empty);
-    console.log('positon = ', position)
-    console.log('empty index = ', emptyIndex)
-    console.log('position index = ', positionIndex)
+  _getBlockMoves(empty, emptyIndex, position, positionIndex) {
+    // console.log('empty ', empty);
+    // console.log('positon = ', position)
+    // console.log('empty index = ', emptyIndex)
+    // console.log('position index = ', positionIndex)
     // throw away the value as we don't need it anymore to update
     // the board, and it's too much to update as we go through
     // board variations, all we care about is the positions;
@@ -112,29 +111,29 @@ class Board {
 
     // return
     if (position.y === empty.y) {
-      console.log('ATLEAST WE GOT HERE for y');
+      // console.log('ATLEAST WE GOT HERE for y');
       let max = Math.max(position.x, empty.x);
       let min = Math.min(position.x, empty.x);
 
       if (max - min === 1) {
-        console.log('X true for = ', position);
+        // console.log('X true for = ', position);
         acceptableYPosition = true
       }
     }
 
     if (position.x === empty.x) {
-      console.log('ATLEAST WE GOT HERE for x')
+      // console.log('ATLEAST WE GOT HERE for x')
       let max = Math.max(empty.y, position.y);
       let min = Math.min(empty.y, position.y);
 
       if (max - min === 1) {
-        console.log('Y true for = ', position)
+        // console.log('Y true for = ', position)
         acceptableXPosition = true
       }
     }
 
     if (acceptableXPosition || acceptableYPosition) {
-      console.log('position = ', position)
+      // console.log('position = ', position)
       position.index = positionIndex;
       return position
     }
@@ -147,6 +146,7 @@ class Board {
     var temp = newBoard[empty];
     newBoard[empty] = newBoard[move];
     newBoard[move] = temp;
+    console.log('NEW BOARD = ', newBoard.join(""))
     return newBoard.join("")
   }
 
@@ -155,7 +155,7 @@ class Board {
     let boardLength = this._originalBoard.length;
     let desiredDistance;
 
-    console.log('calculateManhattanDistance()', pointA, pointB)
+    // console.log('calculateManhattanDistance()', pointA, pointB)
 
     for (var aa in [...Array(boardLength).keys()]) {
       for (var bb in [...Array(boardLength).keys()]) {

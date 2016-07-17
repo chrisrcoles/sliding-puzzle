@@ -4,47 +4,46 @@
 
 class PriorityQueue {
   constructor (comparator, queue) {
-    this._comparator = comparator || PriorityQueue.minFirst;
+    this._comparator = comparator || PriorityQueue.lowestCost;
     this._elements = queue || [];
   }
 
-  static minFirst (a, b) {
-    if (typeof a === 'number' && typeof b === 'number') {
-      return a - b;
+  static lowestCost(a, b) {
+    console.log('a = ', a)
+    console.log('b = ', b)
+    if (!b) {
+      return a
     }
-    else {
-      a = a.toString();
-      b = b.toString();
-
-      if (a == b) return 0;
-
-      return (a > b) ? 1 : -1;
-    }
+    return a.cost - b.cost
   }
 
-  static maxFirst (a, b) {
+  static minFirst(a, b) {
+    return a - b
+  }
+
+  static maxFirst(a, b) {
     return b - a;
   }
 
-  isEmpty () {
+  isEmpty() {
     return this.size() === 0;
   }
 
-  peek () {
+  peek() {
     if (this.isEmpty()) throw new Error('Priority Queue is empty');
 
     return this._elements[0]
   }
 
-  _compare (a, b) {
+  _compare(a, b) {
     return this._comparator(this._elements[a], this._elements[b])
   }
 
-  size () {
+  size() {
     return this._elements.length;
   }
 
-  dequeue () {
+  dequeue() {
     let first = this.peek();
     let last = this._elements.pop();
     let size = this.size();
@@ -77,14 +76,24 @@ class PriorityQueue {
 
   }
 
-  enqueue (element) {
+  enqueue(element) {
+    console.log('Enqueeu', element)
     var size = this._elements.push(element);
     var current = size - 1;
 
+    console.log('SIZE = ', size);
+    console.log('CURRENT = ', current);
+    // return
+
     while (current > 0) {
+      console.log('infinite loop!!!')
       var parent = Math.floor((current - 1) / 2);
 
+      console.log('hi')
+
       if (this._compare(current, parent) <= 0) break;
+
+      console.log('can compare')
 
       this._swap(parent, current);
       current = parent;
@@ -93,13 +102,44 @@ class PriorityQueue {
     return size;
   }
 
-  _swap (a, b) {
+  _swap(a, b) {
     let temp = this._elements[a];
     this._elements[a] = this._elements[b];
     this._elements[b] = temp;
   }
 
 }
+
+
+// var queue = new PriorityQueue();
+//
+// console.log('QUEUE before = ', queue);
+// queue.enqueue({
+//                 cost: 45,
+//                 nodeNumber: 1,
+//                 board: '536_18247',
+//                 pointer: 0,
+//                 grandFatherNode: null
+//               });
+// queue.enqueue({
+//                 cost: 44,
+//                 nodeNumber: 1,
+//                 board: '536_18247',
+//                 pointer: 0,
+//                 grandFatherNode: null
+//               });
+// queue.enqueue({
+//                 cost: 46,
+//                 nodeNumber: 1,
+//                 board: '536_18247',
+//                 pointer: 0,
+//                 grandFatherNode: null
+//               });
+// console.log('QUEUE after = ', queue);
+//
+// queue.dequeue();
+//
+// console.log('QUEUE after dequeuing = ', queue);
 
 
 module.exports = PriorityQueue;
