@@ -40,7 +40,6 @@ class GameDetails extends React.Component {
 
   render () {
     const {numMovesAlreadyMade, timer, boardHeight, boardWidth, error} = this.props.currentGame;
-    let start = timer.start;
     let elapsed = timer.elapsed;
     let _elapsed = Math.round(elapsed / 100);
 

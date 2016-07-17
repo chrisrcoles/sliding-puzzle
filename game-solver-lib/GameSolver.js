@@ -10,7 +10,10 @@ class GameSolver {
     this._gameData = gameData;
     this._board = this.createGameBoard(gameData);
     this._queue = this.createPriorityQueue();
-    this._checked = {}
+    this._checked = {};
+    this.startTime = new Date();
+    this.endTime = null;
+    this.elapsedTime = null;
   }
 
   createGameBoard() {
@@ -62,112 +65,83 @@ class GameSolver {
     this._checked[originNode.board] = true;
 
     return new Promise((resolve, reject) => {
-      this._solve(nodeNumber, 
-                  totalCount, 
-                  solutionFound, 
-                  null, 
+      this._solve(nodeNumber,
+                  totalCount,
+                  solutionFound,
+                  null,
                   (err, solution) => {
                     if (err) {
                       reject(err)
                     }
-                    this._solvePuzzle(solution, 
+                    this._solvePuzzle(solution,
                                       moves,
-                                      (boardMoves) => {
-                                        resolve(boardMoves)
+                                      (boardSolution) => {
+                                        resolve(boardSolution)
                                       })
                   })
     });
   }
 
   _solvePuzzle(solution, moves, cb) {
-    console.log('_solvePuzzle() = ', solution);
-    console.log('moves = ', moves)
+    let key = 'board';
 
     for (var node in solution) {
-      if (node == 'board') {
+      if (node == key) {
         moves.push(solution[node])
       }
     }
 
     if (!solution) {
-      console.log('CASE HIT = ', solution)
-      cb(moves)
+      this._setTimes();
+      moves.unshift(this._board._solutionBoard);
+      const numberOfMoves = moves.length;
+      cb({moves, numberOfMoves})
     }
 
     this._solvePuzzle(solution.grandFatherNode, moves, cb)
   }
 
+  _setTimes() {
+    this.endTime = new Date();
+    let elapsed = Math.round((this.endTime - this.startTime) / 100);
+    let e = (elapsed / 10).toFixed(1);
+    this.elapsedTime = e;
+  }
 
-  //
+
   _solve(nodeNumber, count, solutionFound, solution, cb) {
-    console.log('_solve() called')
     let Queue = this._queue;
     let Board = this._board;
-    console.log('queue length  ', Queue.size())
 
-    // if (nodeNumber > 525) {
-    //   cb(null,
-    //     {hello: 'world'}
-    //   )
-    //   return
-    //
-    // }
-
-    // base cases -- when solution is found
     if (solutionFound) {
-      console.log('Solution found');
-      cb(null, solution);
-      return
+      return cb(null, solution);
     }
 
     if (!Queue._elements.length) {
-      console.log('no more elements found');
-      cb({
+      return cb({
         err: 'NOT FOUND',
-        descr: 'No solution can be found.'
+        description: 'No solution can be found.'
          }, null);
     }
 
     let element = Queue.dequeue();
-
-    console.log('ELEMENT TO PROCESS = ', element)
-
-    // check from here
     const parentBoard = element.board;
     let pointer = element.pointer;
-    // increment count
     count += 1;
 
     const boardMoves = Board.getMoves(parentBoard);
     let empty = boardMoves.empty;
     let moves = boardMoves.moves;
     let child;
-    let checkedAlready;
     let depth;
     let priority;
-    let solutionBoard;
 
-    console.log('moves for ', moves, ' for parent = ', parentBoard,
-                'for empty space = ', empty)
-
-    // console.log('parent board = ', boardMoves)
     moves.forEach(move => {
-      console.log('FUCKING NODE NUM = ', nodeNumber)
-
-      console.log('move = ', move.index)
-      // console.log('moveToMake = ', moveToMake);
       child = Board.makeMove(parentBoard, empty, move.index);
-
-      console.log('move made = ', child)
-      // checkedAlready = this._checked[child] ? true : false;
-
 
       if (!this._checked[child]) {
         if (child == Board._solutionBoard) {
-          console.log('solution found in  here = ', child, element)
-          // solutionBoard = element;
           solutionFound = true;
-          // this._solve(nodeNumber, count, true, child, cb)
         } else {
           solutionFound = false;
         }
@@ -176,29 +150,16 @@ class GameSolver {
       }
       else {
         if (child == Board._solutionBoard) {
-          console.log('solution found')
           solutionFound = true;
-
-          // this._solve(nodeNumber, count, true, child, cb)
         } else {
           solutionFound = false;
         }
 
-        console.log('child checked = ', child)
         return
       }
 
-
-
       depth = pointer + 1;
-      priority = Board.calculateCost(child, depth, nodeNumber)
-
-      console.log(' found priority = ', priority,
-                  ' for child = ', child,
-                  ' for depth = ', depth,
-                  ' for node num = ', nodeNumber,
-                  ' with count = ', count
-      );
+      priority = Board.calculateCost(child, depth, nodeNumber);
 
       let newNode = new BlockNode(
         priority,
@@ -207,19 +168,13 @@ class GameSolver {
         depth,
         element
       );
-      // enqueue new node
+
       Queue.enqueue(newNode);
-
-
     });
 
-
-    // console.log('NODE NUMBER BEING sent ', nodeNumber)
     if (solutionFound) {
-      console.log('not hit')
       this._solve(nodeNumber, count, true, element, cb)
     } else {
-      console.log('hit ')
       this._solve(nodeNumber, count, false, null, cb)
     }
   }
