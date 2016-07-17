@@ -1,18 +1,41 @@
 'use strict';
 
 const BlockNode = require('./BlockNode.js');
+const Board = require('./Board.js');
+const PriorityQueue = require('./PriorityQueue');
 
 class GameSolver {
 
-  constructor (board, queue) {
-    this._board = board;
-    this._queue = queue;
+  constructor(gameData) {
+    this._gameData = gameData;
+    this._board = this.createGameBoard(gameData);
+    this._queue = this.createPriorityQueue();
     this._checked = {}
   }
 
-  solve(callback) {
-    console.log('solve()');
+  createGameBoard() {
+    if (!this._board) {
+      this._board = new Board(
+        this._gameData.currentBoard,
+        this._gameData.solutionBoard,
+        this._gameData.positionalBoard,
+        this._gameData.width,
+        this._gameData.height
+      );
+    }
 
+    return this._board
+  }
+
+  createPriorityQueue() {
+    if (!this._queue) {
+      this._queue = new PriorityQueue();
+    }
+
+    return this._queue
+  }
+
+  solve(callback) {
     let nodeNumber = 1;
     let totalCount = 0;
     let grandFatherNode = null;
@@ -33,22 +56,38 @@ class GameSolver {
       grandFatherNode
     );
 
-    // console.log('origin node = ', originNode);
-
-
     Queue.enqueue(originNode);
-
-    // console.log('checked at top after ', this._checked)
 
     this._checked[originNode.board] = true;
 
-    // console.log('checked at top before ', this._checked)
-
     this._solve(nodeNumber, totalCount, solutionFound, null, (err, solution) => {
-      console.log('solution = ', solution)
-
-      callback(solution)
+      var moves = [];
+      this._solvePuzzle(solution, moves, (moves) => {
+        callback(moves)
+      });
     })
+    
+    
+    
+
+  }
+
+  _solvePuzzle(solution, moves, cb) {
+    console.log('_solvePuzzle() = ', solution);
+    console.log('moves = ', moves)
+
+    for (var node in solution) {
+      if (node == 'board') {
+        moves.push(solution[node])
+      }
+    }
+
+    if (!solution) {
+      console.log('CASE HIT = ', solution)
+      cb(moves)
+    }
+
+    this._solvePuzzle(solution.grandFatherNode, moves, cb)
   }
 
 
