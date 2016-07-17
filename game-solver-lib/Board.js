@@ -15,11 +15,14 @@ const PriorityQueue = require('./PriorityQueue.js');
 const BlockNode = require('./BlockNode.js');
 
 class Board {
-  constructor (board, solution) {
+  constructor (board, solution, positionalBoard, width, height) {
     Board.validateBoard(board);
 
-    this._originalBoard = this.createBoard(board);
-    this._solutionBoard = this.createBoard(solution);
+    this._originalBoard = this.createBoard(board, 'string');
+    this._solutionBoard = this.createBoard(solution, 'string');
+    this._positionalBoard = this.createBoard(positionalBoard, 'array');
+    this.width = width;
+    this.height = height;
 
     this._distances = [];
   }
@@ -28,10 +31,16 @@ class Board {
     console.log('Make sure board is acceptable')
   }
 
-  createBoard(board) {
-    return board.map(b => {
-      return !b && b != 0 ? '_' : b
-    }).join("");
+  createBoard(board, type) {
+      if (type === 'string') {
+        return board.map(b => {
+          return !b && b != 0 ? '_' : b
+        }).join("");
+      }
+
+    if (type === 'array') {
+      return [].concat.apply([], board);
+    }
   }
 
   // => calculates cost heuristic; two parts:
@@ -59,7 +68,71 @@ class Board {
   // => returns the number of empty slots and
   //  a tuple of slots that are legal moves
   getMoves (node) {
+    const empty = node.indexOf('_');
+    const moves = this._getAllowedMoves(node, empty);
 
+    return { empty, moves }
+  }
+
+  _getAllowedMoves (node, empty) {
+    console.log('NODE = ', node);
+    console.log('EMPTY = ', empty);
+    console.log('POSITIONAL BOARD = ', this._positionalBoard);
+
+    let positionalBoard = this._positionalBoard.slice();
+    let emptyPosition = positionalBoard[empty];
+
+    const allowedMoves =  positionalBoard.filter((position, index) => {
+      return this._blockMovable(emptyPosition, empty, position, index)
+    });
+
+    console.log('allowed moves = ', allowedMoves)
+
+
+    // find empty node
+    // see all blocks that are allowed
+  }
+
+  _blockMovable(empty, emptyIndex, position, positionIndex) {
+    console.log('empty ', empty);
+    console.log('positon = ', position)
+    console.log('empty index = ', emptyIndex)
+    console.log('position index = ', positionIndex)
+    // throw away the value as we don't need it anymore to update
+    // the board, and it's too much to update as we go through
+    // board variations, all we care about is the positions;
+    delete position.value;
+    let acceptableYPosition;
+    let acceptableXPosition
+
+
+    // return
+    if (position.y === empty.y) {
+      console.log('ATLEAST WE GOT HERE for y')
+      let max = Math.max(position.x, empty.x);
+      let min = Math.min(position.x, empty.x);
+
+      if (max - min === 1) {
+        console.log('X true for = ', position)
+        acceptableYPosition = true
+      }
+    }
+
+    if (position.x === empty.x) {
+      console.log('ATLEAST WE GOT HERE for x')
+      let max = Math.max(empty.y, position.y);
+      let min = Math.min(empty.y, position.y);
+
+      if (max - min === 1) {
+        console.log('Y true for = ', position)
+        acceptableXPosition = true
+      }
+    }
+
+    if (acceptableXPosition || acceptableYPosition) {
+      console.log('position = ', position)
+      return position
+    }
   }
 
   // => creates a new board by
@@ -71,7 +144,6 @@ class Board {
   // calculates manhattan distance between two points
   calculateManhattanDistance (pointA, pointB) {
     let boardLength = this._originalBoard.length;
-    let boardSquareRoot = Math.sqrt(boardLength);
     let desiredDistance;
 
     console.log('calculateManhattanDistance()', pointA, pointB)
@@ -79,18 +151,18 @@ class Board {
     for (var aa in [...Array(boardLength).keys()]) {
 
       for (var bb in [...Array(boardLength).keys()]) {
-        aa = parseInt(aa, 10)
-        bb = parseInt(bb, 10)
-        var arow = Math.floor(aa / boardSquareRoot);
-        var brow = Math.floor(bb / boardSquareRoot);
+        aa = parseInt(aa, 10);
+        bb = parseInt(bb, 10);
+        var arow = Math.floor(aa / this.height);
+        var brow = Math.floor(bb / this.width);
 
-        var acol = Math.floor(aa % boardSquareRoot);
-        var bcol = Math.floor(bb % boardSquareRoot);
+        var acol = Math.floor(aa % this.width);
+        var bcol = Math.floor(bb % this.height);
 
         var distance = Math.abs(arow - brow) + Math.abs(acol - bcol);
 
-        var o = {distance, aa, bb};
-        this._distances.push(o)
+        var manhattanRef = {distance, aa, bb};
+        this._distances.push(manhattanRef)
       }
 
     }

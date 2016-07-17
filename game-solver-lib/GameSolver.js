@@ -15,10 +15,10 @@ class GameSolver {
     console.log('solve()');
 
     let nodeNumber = 1;
-    let count = 0;
-    let grandFatherNode = 0;
+    let totalCount = 0;
+    let grandFatherNode = null;
     let solutionFound = false;
-    let queue = this._queue;
+    let Queue = this._queue;
     let Board = this._board;
 
     let originalBoardConfig = Board._originalBoard;
@@ -38,33 +38,43 @@ class GameSolver {
       grandFatherNode
     );
 
-    queue.enqueue(originNode);
+    Queue.enqueue(originNode);
     this._checked[originNode] = true;
-    this._solve(nodeNumber, count, solutionFound)
+    this._solve(nodeNumber, totalCount, solutionFound)
   }
 
-  _solve(nodeNumber, count, solutionFound) {
-    let queue = this._queue;
 
+  //
+  _solve(nodeNumber, count, solutionFound) {
+    let Queue = this._queue;
+    let Board = this._board;
+
+    // base cases -- when solution is found
     if (solutionFound) {
       console.log('STOP');
       return
     }
 
-    if (!queue._elements.length) {
+    if (!Queue._elements.length) {
       console.log('no more elements found');
       return
     }
 
-    let element = queue.dequeue();
-
-    console.log('element = ', element);
-    const { cost, nodeNumber, board, pointer} = element;
-
+    // const { cost, nodeNumber, board, pointer, grandfatherNode } = element;
     // junk1, junk2, parent, pdepth, grandpa
+
+    //  paass function the the queue
+    let element = Queue.dequeue();
+    
     // cost, nodeNumber, board, 0, None
     const parentBoard = element.board;
     let depth = element.nodeNumber;
+    // increment count
+    count += 1;
+
+    const boardMoves = Board.getMoves(parentBoard);
+
+
 
 
 

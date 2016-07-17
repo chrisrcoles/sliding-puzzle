@@ -370,7 +370,7 @@ class GamePuzzle extends React.Component {
     let adjacent;
     let targetPositionValueInt = parseInt(targetPositionValue, 10);
 
-    console.log('target position int ', targetPositionValueInt)
+    // console.log('target position int ', targetPositionValueInt)
 
     positionalBoard.forEach((board, boardIdx) => {
       board.forEach(ref => {

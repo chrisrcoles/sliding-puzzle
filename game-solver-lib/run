@@ -4,6 +4,7 @@
 const Board = require('./Board.js');
 const GameSolver = require('./GameSolver.js');
 const PriorityQueue = require('./PriorityQueue.js');
+const positionalBoard = require('./PositionalBoard.js').positionalBoard;
 
 const solutionBoard = [1, 2, 3, 4, 5, 6, 7, 8, null];
 const emptyBlockIndex = 5;
@@ -12,7 +13,7 @@ const currentBoard = [5, 3, 6,null, 1, 8, 2, 4, 7];
 
 // const currentBoard = [4, 3, 6, 1, 7, 8, 2, 5, null];
 
-const board = new Board(currentBoard, solutionBoard);
+const board = new Board(currentBoard, solutionBoard, positionalBoard, 3, 3);
 const queue = new PriorityQueue();
 
 const gameSolver = new GameSolver(board, queue);
