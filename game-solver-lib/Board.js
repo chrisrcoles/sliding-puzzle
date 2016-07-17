@@ -14,6 +14,13 @@ const PriorityQueue = require('./PriorityQueue.js');
 // queue.size(); // 2
 const BlockNode = require('./BlockNode.js');
 
+// we try to estimate how good a partial solution is, that is,
+// how close to the final solution, and requeue it based
+// on this, we get good results.
+// this is the heart of A-start algo
+// rather than DFS or BFS we use a priority queue to
+// reinsert a partial result ahead of others waiting if
+// their "cost" is greater.
 class Board {
   constructor (board, solution, positionalBoard, width, height) {
     Board.validateBoard(board);
@@ -70,7 +77,6 @@ class Board {
   getMoves (node) {
     const empty = node.indexOf('_');
     const moves = this._getAllowedMoves(node, empty);
-
     return { empty, moves }
   }
 
@@ -88,9 +94,7 @@ class Board {
 
     console.log('allowed moves = ', allowedMoves)
 
-
-    // find empty node
-    // see all blocks that are allowed
+    return allowedMoves;
   }
 
   _blockMovable(empty, emptyIndex, position, positionIndex) {
@@ -103,17 +107,17 @@ class Board {
     // board variations, all we care about is the positions;
     delete position.value;
     let acceptableYPosition;
-    let acceptableXPosition
+    let acceptableXPosition;
 
 
     // return
     if (position.y === empty.y) {
-      console.log('ATLEAST WE GOT HERE for y')
+      console.log('ATLEAST WE GOT HERE for y');
       let max = Math.max(position.x, empty.x);
       let min = Math.min(position.x, empty.x);
 
       if (max - min === 1) {
-        console.log('X true for = ', position)
+        console.log('X true for = ', position);
         acceptableYPosition = true
       }
     }
@@ -131,14 +135,19 @@ class Board {
 
     if (acceptableXPosition || acceptableYPosition) {
       console.log('position = ', position)
+      position.index = positionIndex;
       return position
     }
   }
 
   // => creates a new board by
   //  interchanging the tiles in the two slots passed
-  makeMove (a, b) {
-
+  makeMove (parentBoard, empty, move) {
+    let newBoard = parentBoard.split("");
+    var temp = newBoard[empty];
+    newBoard[empty] = newBoard[move];
+    newBoard[move] = temp;
+    return newBoard.join("")
   }
 
   // calculates manhattan distance between two points
@@ -149,7 +158,6 @@ class Board {
     console.log('calculateManhattanDistance()', pointA, pointB)
 
     for (var aa in [...Array(boardLength).keys()]) {
-
       for (var bb in [...Array(boardLength).keys()]) {
         aa = parseInt(aa, 10);
         bb = parseInt(bb, 10);
@@ -164,7 +172,6 @@ class Board {
         var manhattanRef = {distance, aa, bb};
         this._distances.push(manhattanRef)
       }
-
     }
 
     this._distances.forEach(distance => {
@@ -175,21 +182,10 @@ class Board {
 
     return desiredDistance
   }
-
-
 }
 
 module.exports = Board;
 
-
-
-// we try to estimate how good a partial solution is, that is,
-// how close to the final solution, and requeue it based
-// on this, we get good results.
-// this is the heart of A-start algo
-// rather than DFS or BFS we use a priority queue to
-// reinsert a partial result ahead of others waiting if
-// their "cost" is greater.
 
 
 

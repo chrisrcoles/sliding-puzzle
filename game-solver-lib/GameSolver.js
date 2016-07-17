@@ -65,7 +65,7 @@ class GameSolver {
 
     //  paass function the the queue
     let element = Queue.dequeue();
-    
+
     // cost, nodeNumber, board, 0, None
     const parentBoard = element.board;
     let depth = element.nodeNumber;
@@ -73,6 +73,24 @@ class GameSolver {
     count += 1;
 
     const boardMoves = Board.getMoves(parentBoard);
+    let empty = boardMoves.empty;
+    let moves = boardMoves.moves;
+    let child;
+
+    console.log('parent board = ', parentBoard)
+    moves.forEach(move => {
+      // console.log('move = ', move)
+      // console.log('moveToMake = ', moveToMake);
+      // console.log('empty = ', empty)
+      child = Board.makeMove(parentBoard, empty, move.index)
+      console.log('child here = ', child)
+
+      var s = '536' +
+              '_18' +
+              '247';
+
+
+    })
 
 
 
