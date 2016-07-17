@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import Block from './Block';
 
 import store from '../store';
-import test from '../lib/test';
-import PriorityQueue from '../lib/PriorityQueue';
+
+import GameSolver from '../game-solver-lib/GameSolver';
 
 import {
   setBoard,
@@ -23,7 +23,9 @@ class GamePuzzle extends React.Component {
 
   }
 
-  componentWillMount () {}
+  componentWillMount () {
+    console.log('game solver in game puzzle ', GameSolver)
+  }
 
   componentWillUnmount() {
     window.clearInterval(this.intervalId);
