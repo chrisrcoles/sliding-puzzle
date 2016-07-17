@@ -37,7 +37,20 @@ class GameDetails extends React.Component {
 
   _handleHintRequest(e, gameData) {
     store.dispatch(requestHint());
-    // console.log('_handleHintRequest()', GameSolver);
+    console.log('_handleHintRequest()', gameData);
+    const gameSolver = new GameSolver(gameData);
+
+    gameSolver.solve()
+      .then(boardSolution => {
+        console.log("FINAL SOLUTION = ",
+                    boardSolution.moves,
+                    boardSolution.numberOfMoves,
+                    'took ', gameSolver.elapsedTime, 'seconds'
+        )
+      })
+      .catch(reason => {
+        console.log('reason = ', reason)
+      });
 
   }
 
@@ -47,13 +60,13 @@ class GameDetails extends React.Component {
       error, boards
     } = this.props.currentGame;
 
-    // const {
-    //   currentBoard, solvedBoard, positionalBoard
-    // } = boards;
+    const {
+      currentBoard, solvedBoard, positionalBoard
+    } = boards;
 
-    // const gameData = {
-    //   currentBoard, solvedBoard, positionalBoard, boardWidth, boardHeight
-    // };
+    const gameData = {
+      currentBoard, solvedBoard, positionalBoard, boardWidth, boardHeight
+    };
 
 
     let elapsed = timer.elapsed;
@@ -72,7 +85,7 @@ class GameDetails extends React.Component {
         <div className="game-details-container">
           <GameStatus />
           <GameOptions message={message}
-                       handleHintRequest={this._handleHintRequest}
+                       handleHintRequest={(e) => this._handleHintRequest(e, gameData)}
                        handleReset={this._handleReset}
                        handleGiveUp={this._handleGiveUp}
                        movesMade={numMovesAlreadyMade}
