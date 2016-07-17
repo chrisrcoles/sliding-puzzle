@@ -136,6 +136,8 @@ class GameSolver {
     let depth;
     let priority;
 
+    console.log('continuing to solve() for moves ', moves, 'from parent board  , child')
+
     moves.forEach(move => {
       child = Board.makeMove(parentBoard, empty, move.index);
 

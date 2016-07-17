@@ -146,7 +146,6 @@ class Board {
     var temp = newBoard[empty];
     newBoard[empty] = newBoard[move];
     newBoard[move] = temp;
-    // console.log('NEW BOARD = ', newBoard)
     return newBoard.join("")
   }
 
