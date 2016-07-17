@@ -32,6 +32,7 @@ class Board {
     this.height = height;
 
     this._distances = [];
+    this._manD = {};
   }
 
   static validateBoard (board) {
@@ -154,8 +155,6 @@ class Board {
     let boardLength = this._originalBoard.length;
     let desiredDistance;
 
-    // console.log('calculateManhattanDistance()', pointA, pointB)
-
     for (var aa in [...Array(boardLength).keys()]) {
       for (var bb in [...Array(boardLength).keys()]) {
         aa = parseInt(aa, 10);
@@ -169,16 +168,23 @@ class Board {
         var distance = Math.abs(arow - brow) + Math.abs(acol - bcol);
 
         var manhattanRef = {distance, aa, bb};
+        
+        
+        
+        
+        
         this._distances.push(manhattanRef)
       }
     }
+    
+    
 
     this._distances.forEach(distance => {
       if (distance.aa == pointA && distance.bb == pointB) {
         desiredDistance = distance.distance
       }
     });
-
+    
     return desiredDistance
   }
 }

@@ -7,6 +7,7 @@ const PriorityQueue = require('./PriorityQueue');
 class GameSolver {
 
   constructor(gameData) {
+    GameSolver.validate(gameData)
     this._gameData = gameData;
     this._board = this.createGameBoard(gameData);
     this._queue = this.createPriorityQueue();
@@ -16,11 +17,36 @@ class GameSolver {
     this.elapsedTime = null;
   }
 
+  static validate(gameData) {
+
+    for (var key in gameData) {
+      if (key === 'currentBoard' ||
+          key === 'solvedBoard' ||
+          key === 'positionalBoard') {
+
+        if (!Array.isArray(gameData[key])) {
+          throw new Error(
+            'Current Board must be an array'
+          )
+        }
+      }
+
+      if (key === 'width'||
+          key === 'height') {
+        if (!Number.isInteger(gameData[key])) {
+          throw new Error(
+            'Current Board must be an array'
+          )
+        }
+      }
+    }
+  }
+
   createGameBoard() {
     if (!this._board) {
       this._board = new Board(
         this._gameData.currentBoard,
-        this._gameData.solutionBoard,
+        this._gameData.solvedBoard,
         this._gameData.positionalBoard,
         this._gameData.width,
         this._gameData.height
@@ -113,6 +139,13 @@ class GameSolver {
     let Queue = this._queue;
     let Board = this._board;
 
+    console.log('NODE NUMBER = ', nodeNumber)
+
+    if (nodeNumber > 10) {
+      console.log('not found');
+      return
+    }
+
     if (solutionFound) {
       return cb(null, solution);
     }
@@ -135,8 +168,6 @@ class GameSolver {
     let child;
     let depth;
     let priority;
-
-    console.log('continuing to solve() for moves ', moves, 'from parent board ', child)
 
     moves.forEach(move => {
       child = Board.makeMove(parentBoard, empty, move.index);
@@ -162,6 +193,13 @@ class GameSolver {
 
       depth = pointer + 1;
       priority = Board.calculateCost(child, depth, nodeNumber);
+
+      console.log('found priority = ', priority,
+            ' for child = ', child,
+            ' for depth = ', depth,
+            ' for node num = ', nodeNumber,
+            ' with count = ', count
+      )
 
       let newNode = new BlockNode(
         priority,
