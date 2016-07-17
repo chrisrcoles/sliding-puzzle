@@ -16,7 +16,9 @@ const board = new Board(currentBoard, solutionBoard, positionalBoard, 3, 3);
 const queue = new PriorityQueue();
 
 const gameSolver = new GameSolver(board, queue);
-gameSolver.solve();
+gameSolver.solve(solution => {
+  console.log("FINAL SOLUTION = ", solution)
+});
 
 
 // at any time we have:

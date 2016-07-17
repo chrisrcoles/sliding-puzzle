@@ -9,12 +9,12 @@ class PriorityQueue {
   }
 
   static lowestCost(a, b) {
-    console.log('a = ', a)
-    console.log('b = ', b)
+    // console.log('a = ', a)
+    // console.log('b = ', b)
     if (!b) {
       return a
     }
-    return a.cost - b.cost
+    return b.cost - a.cost
   }
 
   static minFirst(a, b) {
@@ -77,23 +77,14 @@ class PriorityQueue {
   }
 
   enqueue(element) {
-    console.log('Enqueeu', element)
     var size = this._elements.push(element);
     var current = size - 1;
 
-    console.log('SIZE = ', size);
-    console.log('CURRENT = ', current);
-    // return
-
     while (current > 0) {
-      console.log('infinite loop!!!')
+
       var parent = Math.floor((current - 1) / 2);
 
-      console.log('hi')
-
       if (this._compare(current, parent) <= 0) break;
-
-      console.log('can compare')
 
       this._swap(parent, current);
       current = parent;
