@@ -58,13 +58,13 @@ class GameSolver {
     let Board = this._board;
     console.log('queue length  ', Queue.size())
 
-    if (nodeNumber > 525) {
-      cb(null,
-        {hello: 'world'}
-      )
-      return
-
-    }
+    // if (nodeNumber > 525) {
+    //   cb(null,
+    //     {hello: 'world'}
+    //   )
+    //   return
+    //
+    // }
 
     // base cases -- when solution is found
     if (solutionFound) {
