@@ -1,19 +1,5 @@
 'use strict';
 
-const PriorityQueue = require('./PriorityQueue.js');
-// console.log('priority queue = ', PriorityQueue)
-// let queue = new PriorityQueue();
-//
-// queue.enqueue({cash: 250, name: 'Valentina'});
-// console.log('quee = ', queue)
-// queue.enqueue({cash: 300, name: 'Jano'});
-// queue.enqueue({cash: 150, name: 'Fran'});
-// queue.size(); // 3
-// queue.peek(); // { cash: 300, name: 'Jano' }
-// queue.dequeue(); // { cash: 300, name: 'Jano' }
-// queue.size(); // 2
-const BlockNode = require('./BlockNode.js');
-
 // we try to estimate how good a partial solution is, that is,
 // how close to the final solution, and requeue it based
 // on this, we get good results.
@@ -28,8 +14,8 @@ class Board {
     this._originalBoard = this.createBoard(board, 'string');
     this._solutionBoard = this.createBoard(solution, 'string');
     this._positionalBoard = this.createBoard(positionalBoard, 'array');
-    this.width = width;
-    this.height = height;
+    this._width = width;
+    this._height = height;
 
     this._distances = [];
   }
@@ -75,28 +61,20 @@ class Board {
   //  a tuple of slots that are legal moves
   getMoves (node) {
     const empty = node.indexOf('_');
-    const moves = this._getAllowedMoves(node, empty);
+    const moves = this._getAllowedMoves(empty);
     return { empty, moves }
   }
 
-  _getAllowedMoves (node, empty) {
-    // console.log('NODE = ', node);
-    // console.log('EMPTY = ', empty);
-    // console.log('POSITIONAL BOARD = ', this._positionalBoard);
-
+  _getAllowedMoves (empty) {
     let positionalBoard = this._positionalBoard.slice();
     let emptyPosition = positionalBoard[empty];
 
-    const allowedMoves =  positionalBoard.filter((position, index) => {
-      return this._getBlockMoves(emptyPosition, empty, position, index)
+    return  positionalBoard.filter((position, index) => {
+      return this._getBlockMoves(emptyPosition, position, index)
     });
-
-    // console.log('allowed moves = ', allowedMoves)
-
-    return allowedMoves;
   }
 
-  _getBlockMoves(empty, emptyIndex, position, positionIndex) {
+  _getBlockMoves(empty, position, positionIndex) {
     // console.log('empty ', empty);
     // console.log('positon = ', position)
     // console.log('empty index = ', emptyIndex)
@@ -111,29 +89,24 @@ class Board {
 
     // return
     if (position.y === empty.y) {
-      // console.log('ATLEAST WE GOT HERE for y');
       let max = Math.max(position.x, empty.x);
       let min = Math.min(position.x, empty.x);
 
       if (max - min === 1) {
-        // console.log('X true for = ', position);
         acceptableYPosition = true
       }
     }
 
     if (position.x === empty.x) {
-      // console.log('ATLEAST WE GOT HERE for x')
       let max = Math.max(empty.y, position.y);
       let min = Math.min(empty.y, position.y);
 
       if (max - min === 1) {
-        // console.log('Y true for = ', position)
         acceptableXPosition = true
       }
     }
 
     if (acceptableXPosition || acceptableYPosition) {
-      // console.log('position = ', position)
       position.index = positionIndex;
       return position
     }
@@ -153,29 +126,21 @@ class Board {
   calculateManhattanDistance (pointA, pointB) {
     let boardLength = this._originalBoard.length;
     let desiredDistance;
-    let forReturn
 
     for (var aa in [...Array(boardLength).keys()]) {
       for (var bb in [...Array(boardLength).keys()]) {
         aa = parseInt(aa, 10);
         bb = parseInt(bb, 10);
-        var arow = Math.floor(aa / this.height);
-        var brow = Math.floor(bb / this.width);
 
-        var acol = Math.floor(aa % this.width);
-        var bcol = Math.floor(bb % this.height);
+        let arow = Math.floor(aa / this._height), acol = Math.floor(aa % this._width);
+        let brow = Math.floor(bb / this._width), bcol = Math.floor(bb % this._height);
 
-        var distance = Math.abs(arow - brow) + Math.abs(acol - bcol);
-
-        var manhattanRef = {distance, aa, bb};
-
-
+        let distance = Math.abs(arow - brow) + Math.abs(acol - bcol);
+        let manhattanRef = {distance, aa, bb};
 
         this._distances.push(manhattanRef)
       }
     }
-
-
 
     this._distances.forEach(distance => {
       if (distance.aa == pointA && distance.bb == pointB) {

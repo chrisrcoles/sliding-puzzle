@@ -30,18 +30,36 @@ const gamePuzzleReducer = function(state = initialState, action) {
   switch(action.type) {
 
     case types.SET_BOARD:
-      let boardDetails = action.data.boardDetails;
-      let width = action.data.boardDetails.boardWidth ? action.data.boardDetails.boardWidth : state.boardWidth;
-      let height = action.data.boardDetails.boardHeight ? action.data.boardDetails.boardHeight : state.boardHeight;
+      const boardDetails = action.data.boardDetails;
+      const width = (boardDetails && boardDetails.boardWidth)
+        ? boardDetails.boardWidth : state.boardWidth;
+      const height = (boardDetails && boardDetails.boardHeight)
+        ? boardDetails.boardHeight : state.boardHeight;
+
+      const emptyIdx = (boardDetails && boardDetails.emptyBlockIdx)
+        ? boardDetails.emptyBlockIdx : state.emptyBlockIdx;
+
+      const initialBoard = (boardDetails && boardDetails.initialBoard)
+        ? boardDetails.initialBoard : state.boards.initalBoard;
+
+      const solvedAndSetBoard = (boardDetails && boardDetails.solvedAndSetBoard)
+        ? boardDetails.solvedAndSetBoard : state.boards.solvedBoard;
+
+      const currentBoard = (boardDetails && boardDetails.currentBoard)
+        ? boardDetails.currentBoard : state.boards.currentBoard;
+
+      const positionalBoard = (boardDetails && boardDetails.positionalBoard)
+        ? boardDetails.positionalBoard : state.boards.positionalBoard;
+
 
       state = Object.assign({}, state, {
         numMovesAlreadyMade: 0,
-        emptyBlockIdx: boardDetails.emptyBlockIdx,
+        emptyBlockIdx: emptyIdx,
         boards: {
-          initialBoard: boardDetails.initialBoard,
-          solvedBoard: boardDetails.solvedAndSetBoard,
-          positionalBoard: boardDetails.positionalBoard,
-          currentBoard: boardDetails.currentBoard
+          initialBoard: initialBoard,
+          solvedBoard: solvedAndSetBoard,
+          positionalBoard: positionalBoard,
+          currentBoard: currentBoard
         },
         boardWidth: width,
         boardHeight: height
@@ -106,7 +124,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
       break;
   }
 
-  console.log('NEW STATE = ', state)
+  console.log('NEW STATE = ', state);
   return state;
 };
 

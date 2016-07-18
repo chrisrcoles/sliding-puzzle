@@ -31,8 +31,8 @@ class GameSolver {
         }
       }
 
-      if (key === 'width'||
-          key === 'height') {
+      if (key === 'boardWidth'||
+          key === 'boardHeight') {
         if (!Number.isInteger(gameData[key])) {
           throw new Error(
             'Current Board must be an array'
@@ -48,8 +48,8 @@ class GameSolver {
         this._gameData.currentBoard,
         this._gameData.solvedBoard,
         this._gameData.positionalBoard,
-        this._gameData.width,
-        this._gameData.height
+        this._gameData.boardWidth,
+        this._gameData.boardHeight
       );
     }
 
@@ -85,6 +85,7 @@ class GameSolver {
       originNodePointer,
       grandFatherNode
     );
+
 
     Queue.enqueue(originNode);
 
@@ -139,8 +140,6 @@ class GameSolver {
     let Queue = this._queue;
     let Board = this._board;
 
-    console.log('NODE NUMBER = ', nodeNumber);
-
     if (solutionFound) {
       return cb(null, solution);
     }
@@ -188,13 +187,6 @@ class GameSolver {
 
       depth = pointer + 1;
       priority = Board.calculateCost(child, depth, nodeNumber);
-
-      console.log('found priority = ', priority,
-            ' for child = ', child,
-            ' for depth = ', depth,
-            ' for node num = ', nodeNumber,
-            ' with count = ', count
-      )
 
       let newNode = new BlockNode(
         priority,

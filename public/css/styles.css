@@ -1,19 +1,39 @@
-.game-puzzle {
-  border: black 2px solid;
-  border-radius: 11px;
-  width: 63%;
-  height: 28rem;
-  margin: 20px 0px 20px 20px;
-  float: left; }
+.type-2x2 {
+  width: 45%;
+  padding-bottom: 45%;
+  /* = width for a 1:1 aspect ratio */ }
 
-.game-puzzle.type-3x3 {
-  height: 28.7rem; }
+.type-2x3, .type-3x3 {
+  width: 30%;
+  padding-bottom: 30%; }
 
-.game-puzzle.type-4x4 {
-  height: 34.6rem; }
+.type-3x2 {
+  width: 33%;
+  padding-bottom: 30%; }
 
-.game-puzzle.type-5x5 {
-  height: 38rem; }
+.type-4x3 {
+  width: 24%;
+  padding-bottom: 24%; }
+
+.type-4x4 {
+  width: 22%;
+  padding-bottom: 22%; }
+
+.type-5x5 {
+  width: 17%;
+  padding-bottom: 17%; }
+
+.block {
+  z-index: 2;
+  max-height: 100%;
+  max-width: 100%; }
+
+.block-value {
+  font-size: 3rem;
+  text-align: center;
+  width: 1rem;
+  margin-left: 5rem;
+  margin-top: 2rem; }
 
 .game-details h2 {
   text-align: center; }
@@ -122,42 +142,22 @@
   .game-options #give-up-text {
     margin-top: 0.6rem; }
 
-.type-2x2 {
-  width: 45%;
-  padding-bottom: 45%;
-  /* = width for a 1:1 aspect ratio */ }
+.game-puzzle {
+  border: black 2px solid;
+  border-radius: 11px;
+  width: 63%;
+  height: 28rem;
+  margin: 20px 0px 20px 20px;
+  float: left; }
 
-.type-2x3, .type-3x3 {
-  width: 30%;
-  padding-bottom: 30%; }
+.game-puzzle.type-3x3 {
+  height: 28.7rem; }
 
-.type-3x2 {
-  width: 33%;
-  padding-bottom: 30%; }
+.game-puzzle.type-4x4 {
+  height: 34.6rem; }
 
-.type-4x3 {
-  width: 24%;
-  padding-bottom: 24%; }
-
-.type-4x4 {
-  width: 22%;
-  padding-bottom: 22%; }
-
-.type-5x5 {
-  width: 17%;
-  padding-bottom: 17%; }
-
-.block {
-  z-index: 2;
-  max-height: 100%;
-  max-width: 100%; }
-
-.block-value {
-  font-size: 3rem;
-  text-align: center;
-  width: 1rem;
-  margin-left: 5rem;
-  margin-top: 2rem; }
+.game-puzzle.type-5x5 {
+  height: 38rem; }
 
 .game-status {
   width: 100%;
