@@ -28,11 +28,11 @@ class GamePuzzle extends React.Component {
     window.clearInterval(this.intervalId);
   }
 
-  _subscribeListeners(maxWidth, maxHeight) {
-    this._subscribeResetButton(maxWidth, maxHeight)
+  _subscribeToPublishers(maxWidth, maxHeight) {
+    this._subscribeToResetButtonPublisher(maxWidth, maxHeight)
   }
 
-  _subscribeResetButton (maxWidth, maxHeight) {
+  _subscribeToResetButtonPublisher (maxWidth, maxHeight) {
     const button = document.getElementById('reset');
 
     let newDetails;
@@ -83,9 +83,8 @@ class GamePuzzle extends React.Component {
     const boardDetails = this._setBoard(boardWidth, boardHeight);
     const start = this.props.timerStart;
 
-    this._subscribeListeners(maxWidth, maxHeight)
+    this._subscribeToPublishers(maxWidth, maxHeight)
 
-    // this._setBoard(boardWidth, boardHeight, (board))
     // this.intervalId = setInterval(() => {
     //   const elapsed = new Date() - start;
     //   store.dispatch(updateTimer({start, elapsed}))
@@ -153,7 +152,7 @@ class GamePuzzle extends React.Component {
     if (arraysEqual) {
       this._setBoard(boardWidth, boardHeight)
     }
-    
+
     return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
   }
 
@@ -231,7 +230,7 @@ class GamePuzzle extends React.Component {
     // let board = shuffledBoard.slice();
     let board = currentBoard.slice();
 
-    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard);
+    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard, emptyBlockIdx);
 
     console.log('board solvable = ', boardSolvable)
     // reset board if it's not solvable
@@ -242,12 +241,12 @@ class GamePuzzle extends React.Component {
       this._setBoard(boardWidth, boardHeight)
     }
 
-    console.log('GOT HERE 1111222, ', emptyBlockIdx, emptyBlockValue)
+    console.log('GOT HERE 1111222, with true board', board)
     return { initialBoard, currentBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue, boardWidth, boardHeight };
   }
 
-  _boardSolvable (board, width, height, positionalBoard) {
-    const inversions = this._countInversions(board);
+  _boardSolvable (board, width, height, positionalBoard, emptyBlockIdx) {
+    const inversions = this._countInversions(board, emptyBlockIdx);
     console.log('TOTAL number of inversions = ', inversions)
 
 
@@ -268,11 +267,13 @@ class GamePuzzle extends React.Component {
   }
 
 
-  _countInversions (board) {
+  _countInversions (board, emptyBlockIdx) {
     console.log('counting inversions with board = ', board)
+    board.splice(emptyBlockIdx, 1)
+    console.log('board without null', board)
     let inversionsFound = 0;
     sort(board);
-    console.log('inversions found here ')
+    console.log('inversions found here = ', inversionsFound);
     return inversionsFound;
 
     function sort (arr) {

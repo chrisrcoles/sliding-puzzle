@@ -25,8 +25,7 @@ const initialState = {
 const gamePuzzleReducer = function(state = initialState, action) {
 
   console.log('Game Puzzle Reducer() ');
-  console.log('hey')
-  console.log('incoming aØction = ', action);
+  console.log('incoming action = ', action);
 
   switch(action.type) {
 
