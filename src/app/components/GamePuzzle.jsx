@@ -22,6 +22,19 @@ class GamePuzzle extends React.Component {
 
   }
 
+  componentDidMount () {
+    const {boardWidth, boardHeight, maxWidth, maxHeight} = this.props.currentGame;
+    const start = this.props.timerStart;
+    this._subscribeToPublishers(maxWidth, maxHeight);
+    this._setBoard(boardWidth, boardHeight, false, null);
+    
+    // timer
+    // this.intervalId = setInterval(() => {
+    //   const elapsed = new Date() - start;
+    //   store.dispatch(updateTimer({start, elapsed}))
+    // }, 1000);
+  }
+
   componentWillMount () {}
 
   componentWillUnmount() {
@@ -33,20 +46,16 @@ class GamePuzzle extends React.Component {
   }
 
   _subscribeToResetButtonPublisher (maxWidth, maxHeight) {
+    let newDetails;
     const button = document.getElementById('reset');
 
-    let newDetails;
-
     button.addEventListener("click", () => {
-      console.log('clicked!')
-
       let height = $('#grid-height').val();
       let width = $('#grid-width').val();
       let parsedWidth = parseInt(width, 10);
       let parsedHeight = parseInt(height, 10);
       let acceptableWidth = (1 <= parsedWidth && parsedWidth > maxWidth + 1);
       let acceptableHeight = (1 <= parsedHeight && parsedHeight > maxHeight + 1);
-      // let bothAcceptable = (acceptableWidth && acceptableHeight)
 
       if (acceptableWidth) {
         console.log('height not in range')
@@ -56,45 +65,71 @@ class GamePuzzle extends React.Component {
           msg: 'Height is out of range. Make sure height is in between 1 and 5.'
         };
 
-        store.dispatch(alertClientError(heightError))
-        return
+        store.dispatch(alertClientError(heightError));
+        return;
 
       }
       else if (acceptableHeight) {
-        console.log('width not in range')
         let widthError = {
           type: '_invalid_width',
           code: 81,
           msg: 'Width is out of range. Make sure width is in between 1 and 5.'
         };
-        store.dispatch(alertClientError(widthError))
-        return
+        store.dispatch(alertClientError(widthError));
+        return;
 
       }
       else {
-        newDetails = this._setBoard(parsedWidth, parsedHeight)
-        store.dispatch(setBoard(newDetails))
+        newDetails = this._setBoard(parsedWidth, parsedHeight);
+        store.dispatch(setBoard(newDetails));
       }
     });
   }
 
-  componentDidMount () {
-    const { boardWidth, boardHeight, maxWidth, maxHeight } = this.props.currentGame;
-    const start = this.props.timerStart;
-    this._subscribeToPublishers(maxWidth, maxHeight);
+  _setBoard (boardWidth, boardHeight, found, gameBoard) {
+    if (found) {
+      store.dispatch(setBoard(gameBoard));
+      return
+    }
 
+    let totalNumberOfBlocks = boardWidth * boardHeight;
 
-    // this.intervalId = setInterval(() => {
-    //   const elapsed = new Date() - start;
-    //   store.dispatch(updateTimer({start, elapsed}))
-    // }, 1000);
+    const shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
+    const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
+    const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
 
-    this._setBoard(boardWidth, boardHeight, false, null);
-  }
+    const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
-  _tick (start) {
-      const elapsed = new Date() - start;
-      store.dispatch(updateTimer({start, elapsed}))
+    if (arraysEqual) {
+      this._setBoard(boardWidth, boardHeight, false, null)
+    }
+
+    let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue)
+    let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue)
+
+    const {initialBoard, emptyBlockIdx} = initialBoardData;
+    const currentBoard = initialBoard;
+    let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
+    let board = currentBoard.slice();
+
+    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard, emptyBlockIdx);
+
+    if (boardSolvable) {
+      const gBoard = {
+        initialBoard,
+        currentBoard,
+        positionalBoard,
+        solvedAndSetBoard,
+        emptyBlockIdx,
+        emptyBlockValue,
+        boardWidth,
+        boardHeight
+      };
+      this._setBoard(boardWidth, boardHeight, true, gBoard)
+    }
+    else {
+      this._setBoard(boardWidth, boardHeight, false, null)
+    }
   }
 
   _getRandomIdx (low, high) {
@@ -124,69 +159,13 @@ class GamePuzzle extends React.Component {
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex -= 1;
 
-      // And swap it with the current element.
+      // Swap it with the current element.
       temporaryValue = array[currentIndex];
       array[currentIndex] = array[randomIndex];
       array[randomIndex] = temporaryValue;
     }
 
     return array;
-  }
-
-  _setBoard(boardWidth, boardHeight, found, gameBoard) {
-    if (found) {
-      console.log('hit case here for board = ', gameBoard)
-      store.dispatch(setBoard(gameBoard));
-      return
-    }
-    console.log('setBoard called()', boardWidth, boardHeight)
-
-    let totalNumberOfBlocks = boardWidth * boardHeight;
-
-    const shuffledBoard = this.shuffleBoard([...Array(totalNumberOfBlocks).keys()].map(i => i + 1));
-    const solvedBoard = [...Array(totalNumberOfBlocks).keys()].map(i => i + 1);
-    const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
-
-    console.log('shuffled board ', shuffledBoard)
-    console.log('solved board ', solvedBoard)
-    console.log('empty block value ', emptyBlockValue)
-
-    const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
-
-    if (arraysEqual) {
-      this._setBoard(boardWidth, boardHeight, false, null)
-    }
-
-    // const p = this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
-    let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue)
-    let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue)
-
-    const {initialBoard, emptyBlockIdx} = initialBoardData;
-
-    const currentBoard = initialBoard;
-
-    let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
-    let board = currentBoard.slice();
-
-    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard, emptyBlockIdx);
-
-    console.log('solvable ? ', boardSolvable, 'for ', currentBoard)
-    if (boardSolvable) {
-      console.log('board solve for ', currentBoard)
-      const gBoard = {
-        initialBoard,
-        currentBoard,
-        positionalBoard,
-        solvedAndSetBoard,
-        emptyBlockIdx,
-        emptyBlockValue,
-        boardWidth,
-        boardHeight
-      };
-      this._setBoard(boardWidth, boardHeight, true, gBoard)
-    } else {
-      this._setBoard(boardWidth, boardHeight, false, null)
-    }
   }
 
   _getPositionalBoard(board, boardWidth) {
@@ -223,6 +202,52 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
+  _prepareSolvedAndSetBoard (board, value) {
+    let b;
+    let valueIdx;
+
+    b = board.map((el, idx) => {
+      if (el === value) {
+        valueIdx = idx;
+        return null
+      }
+
+      if (el > value) {
+        return el - 1
+      }
+      else {
+        return el
+      }
+
+    });
+
+    var emptyBlock = b.splice(valueIdx, 1);
+    b.push(emptyBlock);
+
+    return b
+  }
+
+  _prepareInitialBoard (board, value) {
+    let initialBoard;
+    let emptyBlockIdx;
+
+    initialBoard = board.map((el, idx) => {
+      if (el === value) {
+        emptyBlockIdx = idx;
+        return null
+      }
+
+      if (el > value) {
+        return el - 1
+      }
+      else {
+        return el
+      }
+    });
+
+    return {initialBoard, emptyBlockIdx}
+  }
+
   _preparePositional2DBoard(board, boardWidth, boardHeight) {
     let position;
     let dimensions = [boardWidth, boardHeight];
@@ -241,8 +266,6 @@ class GamePuzzle extends React.Component {
 
   _boardSolvable (board, width, height, positionalBoard, emptyBlockIdx) {
     const inversions = this._countInversions(board, emptyBlockIdx);
-    console.log('TOTAL number of inversions = ', inversions)
-
 
     const evenNumberOfInversions = (inversions % 2) === 0;
     const oddNumberOfInversions = !evenNumberOfInversions;
@@ -260,14 +283,11 @@ class GamePuzzle extends React.Component {
     return (case1 || case2 || case3)
   }
 
-
   _countInversions (board, emptyBlockIdx) {
-    console.log('counting inversions with board = ', board)
-    board.splice(emptyBlockIdx, 1)
-    console.log('board without null', board)
+    // remove null from index
+    board.splice(emptyBlockIdx, 1);
     let inversionsFound = 0;
     sort(board);
-    console.log('inversions found here = ', inversionsFound);
     return inversionsFound;
 
     function sort (arr) {
@@ -327,53 +347,6 @@ class GamePuzzle extends React.Component {
     grid[positionalIdx] ? true : false;
   }
 
-  _prepareSolvedAndSetBoard (board, value) {
-    let b;
-    let valueIdx;
-
-    b = board.map((el, idx) => {
-      if (el === value) {
-        valueIdx = idx;
-        return null
-      }
-
-      if (el > value) {
-        return el - 1
-      }
-      else {
-        return el
-      }
-
-    });
-
-    var emptyBlock = b.splice(valueIdx, 1);
-    b.push(emptyBlock);
-
-    return b
-  }
-
-  _prepareInitialBoard (board, value) {
-    let initialBoard;
-    let emptyBlockIdx;
-
-    initialBoard = board.map((el, idx) => {
-      if (el === value) {
-        emptyBlockIdx = idx;
-        return null
-      }
-
-      if (el > value) {
-        return el - 1
-      }
-      else {
-        return el
-      }
-
-    });
-
-    return { initialBoard, emptyBlockIdx }
-  }
-
   _checkIfBlockIsAdjacent(targetPositionValue, positionalBoard) {
     let emptyBlock;
     let targetBlock;
@@ -384,9 +357,6 @@ class GamePuzzle extends React.Component {
 
     positionalBoard.forEach((board, boardIdx) => {
       board.forEach(ref => {
-        console.log('ref = ', ref);
-        console.log('ref value = ', ref.value);
-
         if (!ref.value) {
           emptyBlock = {ref, boardIdx }
         }
@@ -473,7 +443,6 @@ class GamePuzzle extends React.Component {
       store.dispatch(puzzleSolved())
     }
   }
-
 
   render () {
     let id, value;

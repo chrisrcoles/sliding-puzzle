@@ -4,8 +4,8 @@ import _ from 'lodash';
 const initialState = {
   boardWidth: 3,
   boardHeight: 3,
-  maxHeight: 5,
-  maxWidth: 5,
+  maxHeight: 4,
+  maxWidth: 4,
   emptyBlockIdx: null,
   boards: {
     initialBoard: [],
@@ -25,21 +25,15 @@ const initialState = {
 const gamePuzzleReducer = function(state = initialState, action) {
 
   console.log('Game Puzzle Reducer() ');
-  console.log('incoming action = ', action);
+  console.log('OLD STATE = ', state);
+  console.log('ACTION = ', action);
 
   switch(action.type) {
 
     case types.SET_BOARD:
       let boardDetails = action.data.boardDetails;
-
-      console.log('state board width ', state.boardWidth)
-      console.log('width = ', action.data.boardWidth)
-
       let width = action.data.boardDetails.boardWidth ? action.data.boardDetails.boardWidth : state.boardWidth;
       let height = action.data.boardDetails.boardHeight ? action.data.boardDetails.boardHeight : state.boardHeight;
-
-      console.log('width in action ', width)
-      console.log('height in action ', height)
 
       state = Object.assign({}, state, {
         numMovesAlreadyMade: 0,
@@ -71,19 +65,16 @@ const gamePuzzleReducer = function(state = initialState, action) {
       break;
 
     case types.BLOCK_MOVE_NOT_ALLOWED:
-      console.log('BLOCK CLICK NOT ALLOWED');
       state = Object.assign({}, state);
       break;
 
     case types.PUZZLE_SOLVED:
       state = Object.assign({}, state, {
         boardSolved: true
-      })
+      });
       break;
 
-    // re initialize state as empty
     case types.RESET_BOARD:
-      console.log('reset board reducer state before', state);
       state = Object.assign({}, state, {
         emptyBlockIdx: null,
         boards: {
@@ -96,7 +87,6 @@ const gamePuzzleReducer = function(state = initialState, action) {
         boardSolved: false,
         error: null
       });
-      console.log('reset board reducer called state after ', state);
       break;
 
     case types.UPDATE_TIMER:
@@ -115,10 +105,9 @@ const gamePuzzleReducer = function(state = initialState, action) {
         error: error
       });
       break;
-
   }
 
-
+  console.log('NEW STATE = ', state)
   return state;
 };
 

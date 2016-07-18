@@ -1,23 +1,17 @@
 import React from 'react';
 
 class Block extends React.Component {
-
   constructor (props) {
     super(props);
 
   }
-
-
-  componentWillMount () {
-
-  }
+  
+  componentDidMount () {}
+  componentWillMount () {}
+  componentWillUnmount () {}
 
   render () {
     const {id, type, value} = this.props;
-    // TODO value cannot be null, figure out way to now show missing number
-    // possibly hint
-    let newValue = (this.props.id === "empty") ?
-                   '' : value;
 
     const style = {
       float: 'left',
@@ -41,6 +35,12 @@ class Block extends React.Component {
       </div>
     )
   }
-}
+};
+
+Block.propTypes = {
+  type: React.PropTypes.string.isRequired,
+  id: React.PropTypes.string.isRequired,
+  onBlockClick: React.PropTypes.func.isRequired
+};
 
 export default Block;
