@@ -6,8 +6,11 @@ const PriorityQueue = require('./PriorityQueue');
 
 class GameSolver {
 
-  constructor(gameData) {
+  constructor (gameData) {
+
+
     GameSolver.validate(gameData)
+
     this._gameData = gameData;
     this._board = this.createGameBoard(gameData);
     this._queue = this.createPriorityQueue();
@@ -17,12 +20,13 @@ class GameSolver {
     this.elapsedTime = null;
   }
 
-  static validate(gameData) {
+  static validate (gameData) {
+    console.log('game data = ', gameData)
 
     for (var key in gameData) {
       if (key === 'currentBoard' ||
-          key === 'solvedBoard' ||
-          key === 'positionalBoard') {
+        key === 'solvedBoard' ||
+        key === 'positionalBoard') {
 
         if (!Array.isArray(gameData[key])) {
           throw new Error(
@@ -31,8 +35,8 @@ class GameSolver {
         }
       }
 
-      if (key === 'boardWidth'||
-          key === 'boardHeight') {
+      if (key === 'boardWidth' ||
+        key === 'boardHeight') {
         if (!Number.isInteger(gameData[key])) {
           throw new Error(
             'Current Board must be an array'
@@ -42,7 +46,10 @@ class GameSolver {
     }
   }
 
-  createGameBoard() {
+  createGameBoard () {
+
+    console.log('createGameBoard() ', this._gameData)
+
     if (!this._board) {
       this._board = new Board(
         this._gameData.currentBoard,
@@ -56,7 +63,7 @@ class GameSolver {
     return this._board
   }
 
-  createPriorityQueue() {
+  createPriorityQueue () {
     if (!this._queue) {
       this._queue = new PriorityQueue();
     }
@@ -64,7 +71,7 @@ class GameSolver {
     return this._queue
   }
 
-  solve() {
+  solve () {
     let nodeNumber = 1;
     let totalCount = 0;
     let grandFatherNode = null;
@@ -85,7 +92,6 @@ class GameSolver {
       originNodePointer,
       grandFatherNode
     );
-
 
     Queue.enqueue(originNode);
 
@@ -109,7 +115,7 @@ class GameSolver {
     });
   }
 
-  _solvePuzzle(solution, moves, cb) {
+  _solvePuzzle (solution, moves, cb) {
     let key = 'board';
 
     for (var node in solution) {
@@ -128,7 +134,7 @@ class GameSolver {
     this._solvePuzzle(solution.grandFatherNode, moves, cb)
   }
 
-  _setTimes() {
+  _setTimes () {
     this.endTime = new Date();
     let elapsed = Math.round((this.endTime - this.startTime) / 100);
     let e = (elapsed / 10).toFixed(1);
@@ -136,7 +142,7 @@ class GameSolver {
   }
 
 
-  _solve(nodeNumber, count, solutionFound, solution, cb) {
+  _solve (nodeNumber, count, solutionFound, solution, cb) {
     let Queue = this._queue;
     let Board = this._board;
 
@@ -146,9 +152,9 @@ class GameSolver {
 
     if (!Queue._elements.length) {
       return cb({
-        err: 'NOT FOUND',
-        description: 'No solution can be found.'
-         }, null);
+                  err: 'NOT FOUND',
+                  description: 'No solution can be found.'
+                }, null);
     }
 
     let element = Queue.dequeue();
@@ -163,13 +169,16 @@ class GameSolver {
     let depth;
     let priority;
 
+    console.log('continuing to solve() for moves ', moves, 'from parent board  , child')
+
     moves.forEach(move => {
       child = Board.makeMove(parentBoard, empty, move.index);
 
       if (!this._checked[child]) {
         if (child == Board._solutionBoard) {
           solutionFound = true;
-        } else {
+        }
+        else {
           solutionFound = false;
         }
         nodeNumber += 1;
@@ -178,7 +187,8 @@ class GameSolver {
       else {
         if (child == Board._solutionBoard) {
           solutionFound = true;
-        } else {
+        }
+        else {
           solutionFound = false;
         }
 
@@ -201,7 +211,8 @@ class GameSolver {
 
     if (solutionFound) {
       this._solve(nodeNumber, count, true, element, cb)
-    } else {
+    }
+    else {
       this._solve(nodeNumber, count, false, null, cb)
     }
   }
