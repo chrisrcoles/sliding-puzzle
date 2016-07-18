@@ -39,11 +39,6 @@ class Board {
   }
 
   createBoard (board, type) {
-
-    console.log('board = ', board)
-    console.log('type = ', type)
-
-
     if (type === 'string') {
       return board.map(b => {
         return !b && b != 0 ? '_' : b

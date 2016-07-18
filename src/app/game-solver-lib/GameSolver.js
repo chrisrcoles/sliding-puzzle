@@ -7,8 +7,6 @@ const PriorityQueue = require('./PriorityQueue');
 class GameSolver {
 
   constructor (gameData) {
-
-
     GameSolver.validate(gameData)
 
     this._gameData = gameData;
@@ -21,7 +19,6 @@ class GameSolver {
   }
 
   static validate (gameData) {
-    console.log('game data = ', gameData)
 
     for (var key in gameData) {
       if (key === 'currentBoard' ||
@@ -47,9 +44,6 @@ class GameSolver {
   }
 
   createGameBoard () {
-
-    console.log('createGameBoard() ', this._gameData)
-
     if (!this._board) {
       this._board = new Board(
         this._gameData.currentBoard,
