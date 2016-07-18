@@ -139,12 +139,7 @@ class GameSolver {
     let Queue = this._queue;
     let Board = this._board;
 
-    console.log('NODE NUMBER = ', nodeNumber)
-
-    if (nodeNumber > 10) {
-      console.log('not found');
-      return
-    }
+    console.log('NODE NUMBER = ', nodeNumber);
 
     if (solutionFound) {
       return cb(null, solution);
