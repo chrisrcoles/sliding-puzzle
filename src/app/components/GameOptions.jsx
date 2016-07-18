@@ -20,14 +20,12 @@ class GameOptions extends React.Component {
 
   render () {
     const { movesMade, timerSeconds, message } = this.props;
-    console.log('props for game options', this.props)
 
     const nextBestMove = 'move up';
     const shortestNumberOfMoves = 5;
 
     return (
       <div className="game-options">
-
         <button id="reset"
                 type="button">
           <p id="reset-text">Reset</p>
@@ -39,8 +37,7 @@ class GameOptions extends React.Component {
           <p id="give-up-text">Give Up</p>
         </button>
 
-          <form id="width-form"
-                action="" method="">
+          <form id="width-form">
             <div>
               <label>Width:</label>
               <input id="grid-width"
@@ -48,8 +45,7 @@ class GameOptions extends React.Component {
             </div>
           </form>
 
-          <form id="height-form"
-                action="" method="">
+          <form id="height-form">
             <div>
               <label>Height:</label>
               <input id="grid-height"
@@ -82,17 +78,21 @@ class GameOptions extends React.Component {
         <div id="shortest-num-moves">
           &#35; of moves: {shortestNumberOfMoves}
         </div>
-
-
-
-
       </div>
     )
-
-
   }
+};
 
 
-}
+GameOptions.PropTypes = {
+  shortestNumberOfMoves: React.PropTypes.number,
+  nextBestMove: React.PropTypes.string,
+  message: React.PropTypes.string.isRequired,
+  // timerSeconds: React.PropTypes.number.isRequired,
+  boardHeight: React.PropTypes.number.isRequired,
+  boardWidth: React.PropTypes.number.isRequired,
+  handleGiveUp: React.PropTypes.func.isRequired,
+  handleHintRequest: React.PropTypes.func.isRequired
+};
 
 export default GameOptions;

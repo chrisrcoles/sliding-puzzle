@@ -2,13 +2,10 @@ import React from 'react';
 import GamePuzzle from './GamePuzzle';
 import GameDetails from './GameDetails';
 
-import {Link} from 'react-router';
-
 class Layout extends React.Component {
 
   constructor (props) {
     super(props);
-
   }
 
   render () {

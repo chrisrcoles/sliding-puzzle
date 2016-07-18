@@ -18,8 +18,7 @@ class Block extends React.Component {
       position: 'relative',
       margin: '.8 %',
       backgroundPosition: 'center center',
-      backgroundRepeat: 'no-repeat',
-      fontFamily: 'monospace'
+      backgroundRepeat: 'no-repeat'
     };
 
     return (

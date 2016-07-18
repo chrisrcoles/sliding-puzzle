@@ -9,12 +9,13 @@ const initialState = {
 };
 
 const gameDetailsReducer = function(state = initialState, action) {
-  console.log('REDUCER GOR GAME DETAILS')
+  console.log('REDUCER GOR GAME DETAILS');
+  console.log('OLD STATE = ', state);
+  console.log('Action = ', action);
 
   switch(action.type) {
-    
+
     case 'PAGE_MOUNT':
-      console.log('page mount reducer called', action);
       return Object.assign({}, state);
       break;
 
@@ -23,16 +24,16 @@ const gameDetailsReducer = function(state = initialState, action) {
         resetBoard: true
       });
       break;
-    
+
     case types.REQUEST_HINT:
       return Object.assign({}, state, {
         hint: {
           requesting: true
         }
       })
-    
   }
 
+  console.log('NEW STATE = ', state);
   return state;
 };
 

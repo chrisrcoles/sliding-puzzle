@@ -1,5 +1,4 @@
 import * as types from '../actions/action-types';
-import _ from 'lodash';
 
 const initialState = {
   boardWidth: 3,
@@ -95,7 +94,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
           start: action.data.timer.start,
           elapsed: action.data.timer.elapsed
         }
-      })
+      });
       break;
 
     case types.ALERT_CLIENT_ERROR:

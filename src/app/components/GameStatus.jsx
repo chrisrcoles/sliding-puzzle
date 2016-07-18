@@ -4,17 +4,13 @@ class GameStatus extends React.Component {
 
   constructor (props) {
     super(props);
-
   }
 
   componentDidMount () {}
 
   render () {
-
     return (
-      <div className="game-status">
-
-      </div>
+      <div className="game-status"></div>
     )
   }
 }
