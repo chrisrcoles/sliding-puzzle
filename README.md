@@ -102,7 +102,16 @@ From the project root, run:
 $> node node_modules/gulp/bin/gulp.js serve
 
 $> node node_modules/gulp/bin/gulp.js watch
+
 ```
+
+OR
+
+ ```
+ $> npm start
+
+ ```
+
 
 And in a browser, open:
 
