@@ -78,6 +78,15 @@ Currently the board configurations available are:
 * 4x4
 * 5x5
 
+# Game Solver Library
+
+Implements A * algorithm with priority queue to find the shortest
+puzzle solution. This algorithm effectively assigns a cost to every
+possible board move and explores all child nodes of that board move,
+based on whose cost is the lowest.
+
+ - More documentation to come
+
 
 # Setting up the Application - Installation
 

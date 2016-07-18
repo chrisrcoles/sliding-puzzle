@@ -23,10 +23,6 @@ const initialState = {
 
 const gamePuzzleReducer = function(state = initialState, action) {
 
-  console.log('Game Puzzle Reducer() ');
-  console.log('OLD STATE = ', state);
-  console.log('ACTION = ', action);
-
   switch(action.type) {
 
     case types.SET_BOARD:
@@ -116,15 +112,13 @@ const gamePuzzleReducer = function(state = initialState, action) {
       break;
 
     case types.ALERT_CLIENT_ERROR:
-      console.log('action data error ', action.data.error);
       const error = action.data.error
       state = Object.assign({}, state, {
         error: error
       });
       break;
   }
-
-  console.log('NEW STATE = ', state);
+  
   return state;
 };
 

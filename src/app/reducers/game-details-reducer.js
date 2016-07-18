@@ -9,9 +9,6 @@ const initialState = {
 };
 
 const gameDetailsReducer = function(state = initialState, action) {
-  console.log('REDUCER GOR GAME DETAILS');
-  console.log('OLD STATE = ', state);
-  console.log('Action = ', action);
 
   switch(action.type) {
 
@@ -33,7 +30,6 @@ const gameDetailsReducer = function(state = initialState, action) {
       })
   }
 
-  console.log('NEW STATE = ', state);
   return state;
 };
 
