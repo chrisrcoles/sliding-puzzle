@@ -13,3 +13,4 @@ export const UPDATE_VALUE = 'UPDATE_VALUE';
 export const RESET_BOARD_D = 'RESET_BOARD_D';
 export const ALERT_CLIENT_ERROR = 'ALERT_CLIENT_ERROR';
 export const REQUEST_HINT = 'REQUEST_HINT';
+export const RECEIVED_HINT = 'RECEIVED_HINT';

@@ -3,9 +3,7 @@ import * as types from '../actions/action-types';
 const initialState = {
   receivedBoardDetails: false,
   resetBoard: false,
-  hint: {
-    requesting: false
-  }
+  requestingHint: false
 };
 
 const gameDetailsReducer = function(state = initialState, action) {
@@ -24,10 +22,18 @@ const gameDetailsReducer = function(state = initialState, action) {
 
     case types.REQUEST_HINT:
       return Object.assign({}, state, {
-        hint: {
-          requesting: true
-        }
-      })
+        requestingHint: true
+      });
+    break;
+
+    case types.RECEIVED_HINT:
+      console.log(' action data = ', action.data)
+      return Object.assign({}, state, {
+        requestingHint: false,
+        hint: action.data
+      });
+      break;
+
   }
 
   return state;

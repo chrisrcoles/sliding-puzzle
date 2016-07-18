@@ -39,10 +39,15 @@ class GameOptions extends React.Component {
    *
    * */
   render () {
-    const { movesMade, timerSeconds, message } = this.props;
+    const { movesMade, timerSeconds, message} = this.props;
+      // nextBestMoveIdx, numOfMoves, requestingHint
 
-    const nextBestMove = '';
-    const shortestNumberOfMoves = '';
+    let requestingHintValue;
+    // if (requestingHint) {
+    //   requestingHintValue = 'Requesting a Hint'
+    // } else {
+      requestingHintValue = 'Get a Hint!'
+    // }
 
     return (
       <div className="game-options">
@@ -89,14 +94,16 @@ class GameOptions extends React.Component {
         <button onClick={(e) => this.props.handleHintRequest(e)}
                 id="hint"
                 type="button">
-          <p id="get-hint">Get Hint</p>
+          <p id="get-hint">{requestingHintValue}</p>
+          <p>{hint}</p>
         </button>
 
         <div id="next-best-move">
-          {nextBestMove}
+          <p id="get-hint">Get Hint</p>
+          Next Best Move: {/*{nextBestMoveIdx}*/}
         </div>
         <div id="shortest-num-moves">
-          &#35; of moves: {shortestNumberOfMoves}
+          &#35; of Moves: {/*{numOfMoves}*/}
         </div>
       </div>
     )

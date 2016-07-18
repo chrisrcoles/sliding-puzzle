@@ -13,3 +13,10 @@ export function requestHint () {
     data: {}
   }
 }
+
+export function receivedHint(hint) {
+  return {
+    type: types.RECEIVED_HINT,
+    data: { hint }
+  }
+}

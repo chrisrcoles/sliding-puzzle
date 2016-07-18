@@ -467,7 +467,7 @@ class GamePuzzle extends React.Component {
     }
 
   }
-  
+
   /*
   * Returns whether or not the board row is odd {Boolean}
   *
@@ -642,7 +642,7 @@ class GamePuzzle extends React.Component {
 
   /*
   * Pure component method that uses the Redux store state to create the board.
-  * 
+  *
   * */
   render () {
     let id, value;

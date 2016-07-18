@@ -10,7 +10,8 @@ import GameSolver from '../game-solver-lib/GameSolver';
 
 import {
   resetBoard,
-  requestHint
+  requestHint,
+  receivedHint
 } from '../actions/game-details-actions';
 
 /*
@@ -77,24 +78,57 @@ class GameDetails extends React.Component {
    * */
   _handleHintRequest(e, gameData) {
     store.dispatch(requestHint());
-    console.log('_handleHintRequest()', gameData);
-    const gameSolver = new GameSolver(gameData);
+    console.log('d = ', gameData)
+    let url = 'http://localhost:8011/api/v1/puzzle/solve';
+    console.log('with game data ' + gameData)
+    console.log('get hint with url = ', url)
 
-    /*
-    gameSolver.solve()
-      .then(boardSolution => {
-        console.log("FINAL SOLUTION = ",
-                    boardSolution.moves,
-                    boardSolution.numberOfMoves,
-                    'took ', gameSolver.elapsedTime, 'seconds'
-        )
+    const options = {'Content-Type': 'application/json', crossOrigin: true};
+
+    gameData.positionalBoard =  [].concat.apply([], gameData.positionalBoard);
+
+
+    this.request('POST', url, gameData, options)
+      .then(hint => {
+        store.dispatch(receivedHint(hint._meta.data))
       })
-      .catch(reason => {
-        console.log('reason = ', reason)
-      });
+  }
 
-    store.dispatch(receivedHint())
-    */
+
+
+  request (method, url, data, options) {
+
+    options = options || {};
+
+
+    return new Promise(function (resolve, reject) {
+      var settings = Object.assign({method, url}, options);
+      settings.data = JSON.stringify(data);
+
+      settings.error = function (jqXHR, textStatus, errorThrown) {
+        console.log(jqXHR.status);
+        console.log(jqXHR.responseText);
+        console.log(errorThrown);
+        console.log('making request with : ',
+          method, url, data, options
+        )
+
+
+        reject({
+                 statusCode: jqXHR.status,
+                 errors: jqXHR.responseJSON && jqXHR.responseJSON.errors ?
+                         jqXHR.responseJSON.errors : null
+               });
+
+        reject({jqXHR, textStatus, errorThrown})
+      };
+
+      settings.success = function (data, textStatus, jqXHR) {
+        resolve(data);
+      };
+
+      $.ajax(settings); // Fire the request
+    });
   }
 
   /*
@@ -118,7 +152,7 @@ class GameDetails extends React.Component {
   render () {
     const {
       numMovesAlreadyMade, timer, boardHeight, boardWidth,
-      error, boards, boardSolved
+      error, boards, boardSolved, hint
     } = this.props.currentGame;
 
     const message = error ? error.msg : 'Keep Playing!';
@@ -128,11 +162,17 @@ class GameDetails extends React.Component {
     } = boards;
 
     const seconds = this._getSeconds(timer);
-
+    const requestHintText = 'Request a hint if you need it!';
+    // const numOfMoves = hint && hint.numberOfMoves ?
+    //                    hint.numberOfMoves : requestHintText;
+    
+    // const nextBestMoveIdx = hint && hint.nextBestMoveIdx ?
+    //                         hint.nextBestMoveIdx : requestHintText;
+    //numOfMoves={numOfMoves}
+    // nextBestMoveIdx = {nextBestMoveIdx}
     const gameData = {
       currentBoard, solvedBoard, positionalBoard, boardWidth, boardHeight
     };
-
 
     return (
       <section className="game-details">
