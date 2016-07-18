@@ -1,15 +1,21 @@
 import React from 'react';
 
+/*
+*{Block} Component that represents a game block. This component is 
+* a display component that has no knowledge of the Redux store and 
+* uses the props to create the necessary data bindings.
+* 
+* */
 class Block extends React.Component {
   constructor (props) {
     super(props);
 
   }
-  
-  componentDidMount () {}
-  componentWillMount () {}
-  componentWillUnmount () {}
 
+  /*
+  * Pure component method that uses the Redux store state to create the options.
+  *
+  * */
   render () {
     const {id, type, value} = this.props;
 

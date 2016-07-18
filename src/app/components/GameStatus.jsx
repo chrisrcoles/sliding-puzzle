@@ -1,5 +1,9 @@
 import React from 'react';
 
+/*
+* TODO Implement 
+* 
+* */
 class GameStatus extends React.Component {
 
   constructor (props) {

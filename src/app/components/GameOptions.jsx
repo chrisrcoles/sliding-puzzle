@@ -1,23 +1,43 @@
 import React from 'react';
 
+/*
+ * {GameOptions} Component that represents all of the options of
+ * the current game. This component is a display component that
+ * has no knowledge of the Redux store and uses the props to create
+ * the necessary data bindings.
+ *
+ * */
 class GameOptions extends React.Component {
 
   constructor (props) {
     super (props);
   }
 
-  componentWillMount() {}
 
+  /*
+  * Places the height and width values in the initial forms.
+  *
+  * */
   _setBoardHeightAndWidth(height, width) {
     $('#grid-width').val(width);
     $('#grid-height').val(height);
   }
+
+  /*
+  * Component Lifecycle Method, called before the initial rendering occurs,
+  * calls one main function:
+  * 1. Setting the board height and width.
+  *
+  * */
   componentDidMount () {
     const { boardHeight, boardWidth } = this.props;
     this._setBoardHeightAndWidth(boardHeight, boardWidth)
   }
-  componentWillUnmount() {}
 
+  /*
+   * Pure component method that uses the Redux store state to create the options.
+   *
+   * */
   render () {
     const { movesMade, timerSeconds, message } = this.props;
 
@@ -88,7 +108,7 @@ GameOptions.PropTypes = {
   shortestNumberOfMoves: React.PropTypes.number,
   nextBestMove: React.PropTypes.string,
   message: React.PropTypes.string.isRequired,
-  // timerSeconds: React.PropTypes.number.isRequired,
+  timerSeconds: React.PropTypes.number,
   boardHeight: React.PropTypes.number.isRequired,
   boardWidth: React.PropTypes.number.isRequired,
   handleGiveUp: React.PropTypes.func.isRequired,
