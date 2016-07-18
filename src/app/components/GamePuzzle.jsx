@@ -80,17 +80,16 @@ class GamePuzzle extends React.Component {
 
   componentDidMount () {
     const { boardWidth, boardHeight, maxWidth, maxHeight } = this.props.currentGame;
-    const boardDetails = this._setBoard(boardWidth, boardHeight);
     const start = this.props.timerStart;
+    this._subscribeToPublishers(maxWidth, maxHeight);
 
-    this._subscribeToPublishers(maxWidth, maxHeight)
 
     // this.intervalId = setInterval(() => {
     //   const elapsed = new Date() - start;
     //   store.dispatch(updateTimer({start, elapsed}))
     // }, 1000);
 
-    store.dispatch(setBoard(boardDetails));
+    this._setBoard(boardWidth, boardHeight, false, null);
   }
 
   _tick (start) {
@@ -134,7 +133,12 @@ class GamePuzzle extends React.Component {
     return array;
   }
 
-  _setBoard(boardWidth, boardHeight) {
+  _setBoard(boardWidth, boardHeight, found, gameBoard) {
+    if (found) {
+      console.log('hit case here for board = ', gameBoard)
+      store.dispatch(setBoard(gameBoard));
+      return
+    }
     console.log('setBoard called()', boardWidth, boardHeight)
 
     let totalNumberOfBlocks = boardWidth * boardHeight;
@@ -150,10 +154,39 @@ class GamePuzzle extends React.Component {
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
     if (arraysEqual) {
-      this._setBoard(boardWidth, boardHeight)
+      this._setBoard(boardWidth, boardHeight, false, null)
     }
 
-    return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
+    // const p = this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
+    let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue)
+    let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue)
+
+    const {initialBoard, emptyBlockIdx} = initialBoardData;
+
+    const currentBoard = initialBoard;
+
+    let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
+    let board = currentBoard.slice();
+
+    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard, emptyBlockIdx);
+
+    console.log('solvable ? ', boardSolvable, 'for ', currentBoard)
+    if (boardSolvable) {
+      console.log('board solve for ', currentBoard)
+      const gBoard = {
+        initialBoard,
+        currentBoard,
+        positionalBoard,
+        solvedAndSetBoard,
+        emptyBlockIdx,
+        emptyBlockValue,
+        boardWidth,
+        boardHeight
+      };
+      this._setBoard(boardWidth, boardHeight, true, gBoard)
+    } else {
+      this._setBoard(boardWidth, boardHeight, false, null)
+    }
   }
 
   _getPositionalBoard(board, boardWidth) {
@@ -204,45 +237,6 @@ class GamePuzzle extends React.Component {
     }
 
     return multidimensionalBoard.reverse().map((b) => b.reverse())
-  }
-
-  _prepareBoard (solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight) {
-
-    console.log('_prepareBoard() called', this.props)
-    let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
-    let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
-
-    const { initialBoard, emptyBlockIdx } = initialBoardData;
-
-    const currentBoard = initialBoard;
-
-    let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
-
-    console.log('preparing board called with' +
-                // 'board = ', board,
-                'current board = ', currentBoard,
-                'positional board = ', positionalBoard,
-                'initalBoard = ', initialBoard
-
-      );
-
-
-    // let board = shuffledBoard.slice();
-    let board = currentBoard.slice();
-
-    const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard, emptyBlockIdx);
-
-    console.log('board solvable = ', boardSolvable)
-    // reset board if it's not solvable
-    if (!boardSolvable) {
-      console.log('called again')
-      store.dispatch(resetBoard())
-      console.log('CALLING AGAIN -> ')
-      this._setBoard(boardWidth, boardHeight)
-    }
-
-    console.log('GOT HERE 1111222, with true board', board)
-    return { initialBoard, currentBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue, boardWidth, boardHeight };
   }
 
   _boardSolvable (board, width, height, positionalBoard, emptyBlockIdx) {
