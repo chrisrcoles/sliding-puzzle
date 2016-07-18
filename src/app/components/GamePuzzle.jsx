@@ -85,6 +85,7 @@ class GamePuzzle extends React.Component {
 
     this._subscribeListeners(maxWidth, maxHeight)
 
+    // this._setBoard(boardWidth, boardHeight, (board))
     // this.intervalId = setInterval(() => {
     //   const elapsed = new Date() - start;
     //   store.dispatch(updateTimer({start, elapsed}))
@@ -144,14 +145,15 @@ class GamePuzzle extends React.Component {
     const emptyBlockValue = this._getRandomIdx(1, totalNumberOfBlocks);
 
     console.log('shuffled board ', shuffledBoard)
+    console.log('solved board ', solvedBoard)
+    console.log('empty block value ', emptyBlockValue)
+
     const arraysEqual = this._arraysEqual(solvedBoard, shuffledBoard);
 
     if (arraysEqual) {
       this._setBoard(boardWidth, boardHeight)
     }
-
-    console.log('GOT HERE 1')
-
+    
     return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
   }
 
@@ -231,10 +233,12 @@ class GamePuzzle extends React.Component {
 
     const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard);
 
+    console.log('board solvable = ', boardSolvable)
     // reset board if it's not solvable
     if (!boardSolvable) {
       console.log('called again')
       store.dispatch(resetBoard())
+      console.log('CALLING AGAIN -> ')
       this._setBoard(boardWidth, boardHeight)
     }
 
@@ -311,7 +315,7 @@ class GamePuzzle extends React.Component {
 
   _boardRowOdd (board, height) {
     let positionalIdx;
-    let oddBoardRow;
+    let grid = {};
 
     board.forEach((board, idx) => {
       board.forEach(b => {
@@ -321,18 +325,11 @@ class GamePuzzle extends React.Component {
       })
     });
 
-    let grid = {};
-
     for (var g = height - 1; g >= 0; g -= 2) {
       grid[g] = "odd row"
     }
 
-    if (grid[positionalIdx]) {
-      return true
-    }
-    else {
-      return false
-    }
+    grid[positionalIdx] ? true : false;
   }
 
   _prepareSolvedAndSetBoard (board, value) {
@@ -354,7 +351,7 @@ class GamePuzzle extends React.Component {
 
     });
 
-    var emptyBlock = b.splice(valueIdx, 1)
+    var emptyBlock = b.splice(valueIdx, 1);
     b.push(emptyBlock);
 
     return b
@@ -389,8 +386,6 @@ class GamePuzzle extends React.Component {
     let acceptableYPosition;
     let adjacent;
     let targetPositionValueInt = parseInt(targetPositionValue, 10);
-
-    // console.log('target position int ', targetPositionValueInt)
 
     positionalBoard.forEach((board, boardIdx) => {
       board.forEach(ref => {
@@ -446,11 +441,9 @@ class GamePuzzle extends React.Component {
       positionCanBeMoved = false;
       return {positionCanBeMoved, emptyBlock, targetBlock }
     }
-
   }
 
   _checkIfPositionCanBeMoved(emptyPosition) {
-
     return !emptyPosition.is(':empty')
   }
 
@@ -490,18 +483,11 @@ class GamePuzzle extends React.Component {
   render () {
     let id, value;
     let puzzleBlocks = [];
-
-    const {boardWidth, boardHeight, boards, emptyBlockIdx,
-      minNumMovesForWin, numMovesAlreadyMade } = this.props.currentGame;
-
+    const { boardWidth, boardHeight, boards } = this.props.currentGame;
     const type = "type-" + boardWidth + "x" + boardHeight;
     let currentBoard = boards.currentBoard;
 
-
-
     currentBoard.forEach((block, idx) => {
-      console.log('block = ', block)
-      console.log('empty Block idx = ', emptyBlockIdx)
       if (!block) {
         id = "empty";
         value = "."
@@ -510,8 +496,6 @@ class GamePuzzle extends React.Component {
         value = block
       }
 
-      console.log(' props for game puzzle ', this.props)
-
       puzzleBlocks.push(
         <Block id={id}
         key={idx}
@@ -519,11 +503,8 @@ class GamePuzzle extends React.Component {
         value={value}
         onBlockClick={(e) => this._handleBlockClick(e)}/>
       )
-
     });
 
-    console.log('render for game puzzle with props ', this.props);
-    console.log('moves mad = ', numMovesAlreadyMade)
     return (
       <section className={"game-puzzle " + type}>
         <div className="puzzle-blocks">
