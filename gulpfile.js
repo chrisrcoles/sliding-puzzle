@@ -76,4 +76,9 @@ gulp.task('watch', [
                     'watch-sass:compile-sass'
 ]);
 
+gulp.task('build', [
+  'build-javascripts',
+  'compile-sass'
+]);
+
 gulp.task('default', ['serve']);

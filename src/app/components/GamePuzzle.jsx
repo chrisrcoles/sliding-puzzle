@@ -22,21 +22,17 @@ class GamePuzzle extends React.Component {
 
   }
 
-  componentWillMount () {
-    console.log('game solver in game puzzle ', GameSolver)
-  }
+  componentWillMount () {}
 
   componentWillUnmount() {
     window.clearInterval(this.intervalId);
   }
 
-  componentDidMount () {
-    const { boardWidth, boardHeight, maxWidth, maxHeight } = this.props.currentGame;
-    const requestedReset = this.props.gameDetails.resetBoard;
-    const boardDetails = this._setBoard(boardWidth, boardHeight);
-    const start = this.props.timerStart;
+  _subscribeListeners(maxWidth, maxHeight) {
+    this._subscribeResetButton(maxWidth, maxHeight)
+  }
 
-    const document = window.document;
+  _subscribeResetButton (maxWidth, maxHeight) {
     const button = document.getElementById('reset');
 
     let newDetails;
@@ -50,9 +46,9 @@ class GamePuzzle extends React.Component {
       let parsedHeight = parseInt(height, 10);
       let acceptableWidth = (1 <= parsedWidth && parsedWidth > maxWidth + 1);
       let acceptableHeight = (1 <= parsedHeight && parsedHeight > maxHeight + 1);
-      let bothAcceptable = (acceptableWidth && acceptableHeight)
+      // let bothAcceptable = (acceptableWidth && acceptableHeight)
 
-     if (acceptableWidth) {
+      if (acceptableWidth) {
         console.log('height not in range')
         let heightError = {
           type: '_invalid_height',
@@ -60,24 +56,34 @@ class GamePuzzle extends React.Component {
           msg: 'Height is out of range. Make sure height is in between 1 and 5.'
         };
 
-        store.dispatch( alertClientError(heightError))
+        store.dispatch(alertClientError(heightError))
         return
 
-      } else if (acceptableHeight) {
+      }
+      else if (acceptableHeight) {
         console.log('width not in range')
         let widthError = {
           type: '_invalid_width',
           code: 81,
           msg: 'Width is out of range. Make sure width is in between 1 and 5.'
         };
-        store.dispatch( alertClientError(widthError))
+        store.dispatch(alertClientError(widthError))
         return
 
-      } else  {
+      }
+      else {
         newDetails = this._setBoard(parsedWidth, parsedHeight)
         store.dispatch(setBoard(newDetails))
       }
     });
+  }
+
+  componentDidMount () {
+    const { boardWidth, boardHeight, maxWidth, maxHeight } = this.props.currentGame;
+    const boardDetails = this._setBoard(boardWidth, boardHeight);
+    const start = this.props.timerStart;
+
+    this._subscribeListeners(maxWidth, maxHeight)
 
     // this.intervalId = setInterval(() => {
     //   const elapsed = new Date() - start;
@@ -89,7 +95,6 @@ class GamePuzzle extends React.Component {
 
   _tick (start) {
       const elapsed = new Date() - start;
-
       store.dispatch(updateTimer({start, elapsed}))
   }
 
@@ -110,16 +115,13 @@ class GamePuzzle extends React.Component {
 
     return true;
   }
-  // Fisher-Yates for more robust randomizing algo
+
   shuffleBoard (array) {
     let currentIndex = array.length;
     let temporaryValue;
     let randomIndex;
 
-    // While there remain elements to shuffle...
     while (0 !== currentIndex) {
-
-      // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex -= 1;
 
@@ -151,49 +153,6 @@ class GamePuzzle extends React.Component {
     console.log('GOT HERE 1')
 
     return this._prepareBoard(solvedBoard, shuffledBoard, emptyBlockValue, boardWidth, boardHeight)
-  }
-
-  _countInversions(board) {
-    let inversionsFound = 0;
-    sort(board);
-    return inversionsFound;
-
-    function sort (arr) {
-      if (arr.length === 1) return arr;
-      let right = arr.splice(Math.floor(arr.length / 2), arr.length - 1);
-      return merge(sort(arr), sort(right));
-    }
-
-    function merge (left, right) {
-      let merged = [];
-      let l = 0;
-      let r = 0;
-      let multiplier = 0;
-
-      while (l < left.length || r < right.length) {
-        if (l === left.length) {
-          merged.push(right[r]);
-          r++;
-        }
-        else if (r === right.length) {
-          merged.push(left[l]);
-          l++;
-          inversionsFound += multiplier;
-        }
-        else if (left[l] < right[r]) {
-          merged.push(left[l]);
-          inversionsFound += multiplier;
-          l++;
-        }
-        else {
-          merged.push(right[r]);
-          r++;
-          multiplier++;
-        }
-      }
-      return merged;
-    }
-
   }
 
   _getPositionalBoard(board, boardWidth) {
@@ -252,13 +211,23 @@ class GamePuzzle extends React.Component {
     let initialBoardData = this._prepareInitialBoard(shuffledBoard, emptyBlockValue);
     let solvedAndSetBoard = this._prepareSolvedAndSetBoard(solvedBoard, emptyBlockValue);
 
-    let board = shuffledBoard.slice();
-
     const { initialBoard, emptyBlockIdx } = initialBoardData;
 
     const currentBoard = initialBoard;
 
     let positionalBoard = this._preparePositional2DBoard(initialBoard, boardWidth, boardHeight);
+
+    console.log('preparing board called with' +
+                // 'board = ', board,
+                'current board = ', currentBoard,
+                'positional board = ', positionalBoard,
+                'initalBoard = ', initialBoard
+
+      );
+
+
+    // let board = shuffledBoard.slice();
+    let board = currentBoard.slice();
 
     const boardSolvable = this._boardSolvable(board, boardWidth, boardHeight, positionalBoard);
 
@@ -271,6 +240,73 @@ class GamePuzzle extends React.Component {
 
     console.log('GOT HERE 1111222, ', emptyBlockIdx, emptyBlockValue)
     return { initialBoard, currentBoard, positionalBoard, solvedAndSetBoard, emptyBlockIdx, emptyBlockValue, boardWidth, boardHeight };
+  }
+
+  _boardSolvable (board, width, height, positionalBoard) {
+    const inversions = this._countInversions(board);
+    console.log('TOTAL number of inversions = ', inversions)
+
+
+    const evenNumberOfInversions = (inversions % 2) === 0;
+    const oddNumberOfInversions = !evenNumberOfInversions;
+
+    const evenBoardWidth = (width % 2) === 0;
+    const oddBoardWidth = !evenBoardWidth;
+
+    const oddBoardRow = this._boardRowOdd(positionalBoard, height);
+    const evenBoardRow = !oddBoardRow;
+
+    const case1 = (oddBoardWidth && evenNumberOfInversions);
+    const case2 = (evenBoardWidth && evenBoardRow && oddNumberOfInversions);
+    const case3 = (evenBoardWidth && oddBoardRow && evenNumberOfInversions);
+
+    return (case1 || case2 || case3)
+  }
+
+
+  _countInversions (board) {
+    console.log('counting inversions with board = ', board)
+    let inversionsFound = 0;
+    sort(board);
+    console.log('inversions found here ')
+    return inversionsFound;
+
+    function sort (arr) {
+      if (arr.length === 1) return arr;
+      let right = arr.splice(Math.floor(arr.length / 2), arr.length - 1);
+      return merge(sort(arr), sort(right));
+    }
+
+    function merge (left, right) {
+      let merged = [];
+      let l = 0;
+      let r = 0;
+      let multiplier = 0;
+
+      while (l < left.length || r < right.length) {
+        if (l === left.length) {
+          merged.push(right[r]);
+          r++;
+        }
+        else if (r === right.length) {
+          merged.push(left[l]);
+          l++;
+          inversionsFound += multiplier;
+        }
+        else if (left[l] < right[r]) {
+          merged.push(left[l]);
+          inversionsFound += multiplier;
+          l++;
+        }
+        else {
+          merged.push(right[r]);
+          r++;
+          multiplier++;
+        }
+      }
+      return merged;
+    }
+
   }
 
   _boardRowOdd (board, height) {
@@ -293,27 +329,10 @@ class GamePuzzle extends React.Component {
 
     if (grid[positionalIdx]) {
       return true
-    } else {
+    }
+    else {
       return false
     }
-  }
-
-  _boardSolvable (board, width, height, positionalBoard) {
-    const inversions = this._countInversions(board);
-    const evenNumberOfInversions = (inversions % 2) === 0;
-    const oddNumberOfInversions = !evenNumberOfInversions;
-
-    const evenBoardWidth = (width % 2) === 0;
-    const oddBoardWidth = !evenBoardWidth;
-
-    const oddBoardRow = this._boardRowOdd(positionalBoard, height);
-    const evenBoardRow = !oddBoardRow;
-
-    const case1 = (oddBoardWidth && evenNumberOfInversions);
-    const case2 = (evenBoardWidth && evenBoardRow && oddNumberOfInversions);
-    const case3 = (evenBoardWidth && oddBoardRow && evenNumberOfInversions);
-
-    return (case1 || case2 || case3)
   }
 
   _prepareSolvedAndSetBoard (board, value) {

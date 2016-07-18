@@ -84,7 +84,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
 
     // re initialize state as empty
     case types.RESET_BOARD:
-      console.log('reset board reducer called!!', state)
+      console.log('reset board reducer state before', state);
       state = Object.assign({}, state, {
         emptyBlockIdx: null,
         boards: {
@@ -97,6 +97,7 @@ const gamePuzzleReducer = function(state = initialState, action) {
         boardSolved: false,
         error: null
       });
+      console.log('reset board reducer called state after ', state);
       break;
 
     case types.UPDATE_TIMER:
