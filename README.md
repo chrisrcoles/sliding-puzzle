@@ -39,8 +39,6 @@ of just numbers.
 ![Image of Example Puzzle]
 (https://gm1.ggpht.com/UKXzytDUIfVHFu_58l4-S2ii5nd96tN7Bdcce3DXNJOWXpx9udHbZn-VVZVKb498Vzde5did0aCwapzy-h2B9H2l3VGITBfD0P-ODIisM6GsbcNqLfvvYCAbQtwu6UW3OIWMeGg4GfOljWrhC2ZTNrEjms6xe_PD4EJiXij0Zynev3XnHBuqtkajPbXFe0NvGbghEvfrirc5fQ09ZnCHLIAKTH7_2wK1VgZNGpw0C1zZiMqQJThsK_N_zjG_sQX9pFoPAyXY-2rweKMIl0YqYLNuGyha45OU6gUWSirC4PmFIHRooerM71gWJTy8BCPw4rW0fWXux4V61alUL7OCAsfoyUdH6suabUdifTfLzWuR1QKflNsgTG2U7nOtOAetageGJecu0zcz4sI5o09MH55nu_IWI1f_Hq7g1YGNyaVXWBicM2GB11SxvdK2AHN7_EKBXjeCKiXq-a-VkvJlt3OyEBM7JRVOaHOpyL8zhF6jDLEcB2YyDEqYMFv6YLUyJE8ECOrh776h8bUtzd0A3f3GBt5JL1OG_TMV4Y138T1ow4eE1ChCJofRAldlcL9ziTK9025cn4ml4ktCJyC4l-fQeRl7lmg3AaodAvuaPmrIOks7ZiLGl0oW7Wrht4sARk2nS7AE8Peq7FHS5RVcVw11GrDUsGyZa32Uj7gWSUNrMRcbUqUf_QPIgCZKBqc=s0-l75-ft-l75-ft)
 
-
-
 # Application Architecture
 
 The entire application runs on Node.js, for the application server,
@@ -101,4 +99,8 @@ And in a browser, open:
 
 ``` localhost:8080/```
 
+# Features In Progress
+
+1. Unit Tests
+2. Making a CLI tool for the `game-solver-lib`
 
