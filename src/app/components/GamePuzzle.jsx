@@ -15,6 +15,9 @@ import {
   alertClientError
 } from '../actions/game-puzzle-actions';
 
+/*
+* {GamePuzzle} Component that represents the actual game board
+* */
 class GamePuzzle extends React.Component {
 
   constructor (props) {
@@ -464,8 +467,7 @@ class GamePuzzle extends React.Component {
     }
 
   }
-
-
+  
   /*
   * Returns whether or not the board row is odd {Boolean}
   *
