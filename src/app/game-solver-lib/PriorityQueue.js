@@ -7,8 +7,6 @@ class PriorityQueue {
   }
 
   static lowestCost (a, b) {
-    // console.log('a = ', a)
-    // console.log('b = ', b)
     if (!b) {
       return a
     }

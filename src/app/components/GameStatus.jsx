@@ -1,8 +1,8 @@
 import React from 'react';
 
 /*
-* TODO Implement 
-* 
+* TODO Implement
+*
 * */
 class GameStatus extends React.Component {
 
@@ -13,8 +13,11 @@ class GameStatus extends React.Component {
   componentDidMount () {}
 
   render () {
+    let boardSolved = this.props.boardSolved ? "Board Solved" : "Still unsolved"
     return (
-      <div className="game-status"></div>
+      <div className="game-status">
+        Solved: {boardSolved}
+      </div>
     )
   }
 }

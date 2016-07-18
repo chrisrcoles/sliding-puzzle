@@ -1,66 +1,27 @@
 #!/usr/bin/env node
 'use strict';
 
-// const cli = require('commander');
 
 const GameSolver = require('./GameSolver.js');
-const positionalBoard = require('./PositionalBoard.js').positionalBoard;
-const solvedBoard = [1, 2, 3, 4, 5, 6, 7, 8, null];
-// const currentBoard = [1, 5, 2, 4, 3, 7, 8, 6, null];
-// const currentBoard = [null, 3, 8, 7, 6, 2, 4, 5, 1]
-// const currentBoard = [7,4,8,3, null,2,6,5,1]
-// const currentBoard = [5, 3, 6, null, 1, 8, 2, 4, 7];
-// const currentBoard = [7,4,8,3,null,2,6,5,1]
-// const currentBoard = [3,6,1,2,8,5,null,4,7]
-const currentBoard = [1,4,7,2,8,5,3,6,null]
+// Positional Board, boards must be perfect squares
+const positionalBoard = require('./PositionalBoard.js').positional9Board;
+// Board in solution state
+const solutionBoard = [1, 2, 3, 4, 5, 6, 7, 8, null];
+// Initial, or current boars
+const currentBoard = [1, 5, 2, 4, 3, 7, 8, 6, null];
+
 const boardWidth = 3;
 const boardHeight = 3;
 
 const gameData = {
   currentBoard,
-  solvedBoard,
+  solutionBoard,
   positionalBoard,
   boardWidth,
   boardHeight
 };
 
 const gameSolver = new GameSolver(gameData);
-
-// Setup the CLI with commander
-/*
- cli
- .version('0.1.0')
- .usage('<board>\n\n    Where <board> is the board to solve.' +
- '\n    Example:  node/game-solver-lib/run _25764183' +
- '\n    Boards must be perfect squares.' +
- '\n    Only 9, 16, or 25 digit boards are currently supported' +
- '\n    `_` represents the empty board space.');
- cli.parse(process.argv);
-
- console.log('ARGS = ', cli.args)
-
- var board = cli.args[0];
-
- const acceptableBoardLength = function (board) {
- return (board.length === 9 ||
- board.length === 16 ||
- board.length === 25)
- };
-
- const getGameData = function (board) {
- let width, height, positionalBoard, currentBoard, solvedBoard;
-
- let boardSqRt = Math.sqrt(board.length)
-
- };
-
- if (!board) {
- return cli.outputHelp();
- } else if (!acceptableBoardLength(board)) {
- process.stdout.write('Board length must be 9, 16, or 25')
- return cli.outputHelp()
- }
- */
 
 gameSolver.solve()
   .then(boardSolution => {

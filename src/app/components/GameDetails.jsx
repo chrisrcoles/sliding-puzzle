@@ -80,6 +80,7 @@ class GameDetails extends React.Component {
     console.log('_handleHintRequest()', gameData);
     const gameSolver = new GameSolver(gameData);
 
+    /*
     gameSolver.solve()
       .then(boardSolution => {
         console.log("FINAL SOLUTION = ",
@@ -92,7 +93,8 @@ class GameDetails extends React.Component {
         console.log('reason = ', reason)
       });
 
-    // store.dispatch(receivedHint())
+    store.dispatch(receivedHint())
+    */
   }
 
   /*
@@ -116,7 +118,7 @@ class GameDetails extends React.Component {
   render () {
     const {
       numMovesAlreadyMade, timer, boardHeight, boardWidth,
-      error, boards
+      error, boards, boardSolved
     } = this.props.currentGame;
 
     const message = error ? error.msg : 'Keep Playing!';
@@ -135,7 +137,7 @@ class GameDetails extends React.Component {
     return (
       <section className="game-details">
         <div className="game-details-container">
-          <GameStatus />
+          <GameStatus solved={boardSolved}/>
           <GameOptions message={message}
                        handleHintRequest={(e) => this._handleHintRequest(e, gameData)}
                        handleReset={this._handleReset}

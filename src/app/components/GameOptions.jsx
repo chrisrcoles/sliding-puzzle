@@ -41,8 +41,8 @@ class GameOptions extends React.Component {
   render () {
     const { movesMade, timerSeconds, message } = this.props;
 
-    const nextBestMove = 'move up';
-    const shortestNumberOfMoves = 5;
+    const nextBestMove = '';
+    const shortestNumberOfMoves = '';
 
     return (
       <div className="game-options">

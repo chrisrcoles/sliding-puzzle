@@ -47,7 +47,7 @@ class GameSolver {
     if (!this._board) {
       this._board = new Board(
         this._gameData.currentBoard,
-        this._gameData.solvedBoard,
+        this._gameData.solutionBoard,
         this._gameData.positionalBoard,
         this._gameData.boardWidth,
         this._gameData.boardHeight
@@ -122,6 +122,7 @@ class GameSolver {
       this._setTimes();
       moves.unshift(this._board._solutionBoard);
       const numberOfMoves = moves.length;
+      
       cb({moves, numberOfMoves})
     }
 

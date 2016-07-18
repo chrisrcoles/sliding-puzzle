@@ -75,28 +75,22 @@ class Board {
   //  a tuple of slots that are legal moves
   getMoves (node) {
     const empty = node.indexOf('_');
-    const moves = this._getAllowedMoves(node, empty);
+    const moves = this._getAllowedMoves(empty);
     return {empty, moves}
   }
 
-  _getAllowedMoves (node, empty) {
-    // console.log('NODE = ', node);
-    // console.log('EMPTY = ', empty);
-    // console.log('POSITIONAL BOARD = ', this._positionalBoard);
-
+  _getAllowedMoves (empty) {
     let positionalBoard = this._positionalBoard.slice();
     let emptyPosition = positionalBoard[empty];
 
     const allowedMoves = positionalBoard.filter((position, index) => {
-      return this._getBlockMoves(emptyPosition, empty, position, index)
+      return this._getBlockMoves(emptyPosition, position, index)
     });
-
-    // console.log('allowed moves = ', allowedMoves)
-
+    
     return allowedMoves;
   }
 
-  _getBlockMoves (empty, emptyIndex, position, positionIndex) {
+  _getBlockMoves (empty, position, positionIndex) {
     // console.log('empty ', empty);
     // console.log('positon = ', position)
     // console.log('empty index = ', emptyIndex)
