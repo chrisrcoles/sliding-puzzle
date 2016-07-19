@@ -39,15 +39,36 @@ class GameOptions extends React.Component {
    *
    * */
   render () {
-    const { movesMade, timerSeconds, message} = this.props;
-      // nextBestMoveIdx, numOfMoves, requestingHint
+    const { movesMade, timerSeconds, message,
+      nextBestMoveIdx, numOfMoves, requestingHint,
+      hintRequestTime } = this.props;
 
-    let requestingHintValue;
-    // if (requestingHint) {
-    //   requestingHintValue = 'Requesting a Hint'
-    // } else {
+    let requestingHintValue, requestingHintWarning;
+    if (requestingHint) {
+      requestingHintWarning = 'Don\'t move the board while hint is ' +
+        'requesting for accuracy';
+      requestingHintValue = 'Requesting a Hint'
+    } else {
+      requestingHintWarning = 'Okay to move board!';
       requestingHintValue = 'Get a Hint!'
-    // }
+    }
+
+    let timeFound;
+
+    if (hintRequestTime && !requestingHint && nextBestMoveIdx) {
+      timeFound = "Last hint found in " + hintRequestTime + " seconds."
+    } else if (requestingHint) {
+      timeFound = "Requesting hint."
+    } else {
+      timeFound = "Find a hint"
+    }
+
+    console.log(
+      'give me stuff ', nextBestMoveIdx,
+      'moves = ', numOfMoves,
+      'hint = ', requestingHint
+    )
+
 
     return (
       <div className="game-options">
@@ -95,16 +116,19 @@ class GameOptions extends React.Component {
                 id="hint"
                 type="button">
           <p id="get-hint">{requestingHintValue}</p>
-          <p>{hint}</p>
         </button>
 
         <div id="next-best-move">
-          <p id="get-hint">Get Hint</p>
-          Next Best Move: {/*{nextBestMoveIdx}*/}
+          <p id="get-hint">{requestingHintWarning}</p>
+          Next Best Move: {nextBestMoveIdx}
         </div>
         <div id="shortest-num-moves">
-          &#35; of Moves: {/*{numOfMoves}*/}
+          &#35; of Moves: {numOfMoves}
         </div>
+        <div id="hint-found-time">
+          {timeFound}
+        </div>
+
       </div>
     )
   }

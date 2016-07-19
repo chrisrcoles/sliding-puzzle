@@ -40,10 +40,10 @@ class GamePuzzle extends React.Component {
     this._setBoard(boardWidth, boardHeight, false, null);
 
     // timer
-    // this.intervalId = setInterval(() => {
-    //   const elapsed = new Date() - start;
-    //   store.dispatch(updateTimer({start, elapsed}))
-    // }, 1000);
+    this.intervalId = setInterval(() => {
+      const elapsed = new Date() - start;
+      store.dispatch(updateTimer({start, elapsed}))
+    }, 1000);
   }
 
   /*
@@ -633,7 +633,13 @@ class GamePuzzle extends React.Component {
   * an event is dispatched to the Redux store to notify the user.
   * */
   _checkIfPuzzleSolved (currentBoard, solvedBoard) {
-    const arraysEqual = this._arraysEqual(currentBoard, solvedBoard);
+    let lastValidElement = currentBoard.length -1;
+    let _currentBoard = currentBoard.slice(0, lastValidElement);
+    let _solvedBoard = solvedBoard.slice(0, lastValidElement);
+
+    console.log('checking if arrays are the same = ', _currentBoard,
+    'and solved == ', _solvedBoard)
+    const arraysEqual = this._arraysEqual(_currentBoard, _solvedBoard);
 
     if (arraysEqual) {
       store.dispatch(puzzleSolved())

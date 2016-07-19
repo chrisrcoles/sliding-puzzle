@@ -13,10 +13,10 @@ class GameStatus extends React.Component {
   componentDidMount () {}
 
   render () {
-    let boardSolved = this.props.boardSolved ? "Board Solved" : "Still unsolved"
+    let boardSolved = this.props.boardSolved ? "Solved" : "Still unsolved"
     return (
       <div className="game-status">
-        Solved: {boardSolved}
+        <p id="solved-status">{boardSolved}</p>
       </div>
     )
   }

@@ -152,8 +152,11 @@ class GameDetails extends React.Component {
   render () {
     const {
       numMovesAlreadyMade, timer, boardHeight, boardWidth,
-      error, boards, boardSolved, hint
+      error, boards, boardSolved
     } = this.props.currentGame;
+
+    console.log('props for details ', this.props)
+    const { requestingHint, hint, hintRequestTime } = this.props.gameDetails;
 
     const message = error ? error.msg : 'Keep Playing!';
 
@@ -162,17 +165,17 @@ class GameDetails extends React.Component {
     } = boards;
 
     const seconds = this._getSeconds(timer);
-    const requestHintText = 'Request a hint if you need it!';
-    // const numOfMoves = hint && hint.numberOfMoves ?
-    //                    hint.numberOfMoves : requestHintText;
-    
-    // const nextBestMoveIdx = hint && hint.nextBestMoveIdx ?
-    //                         hint.nextBestMoveIdx : requestHintText;
-    //numOfMoves={numOfMoves}
-    // nextBestMoveIdx = {nextBestMoveIdx}
+    const requestHintText = 'Unknown';
+    const numOfMoves = hint && hint.numberOfMoves ?
+                       hint.numberOfMoves : requestHintText;
+
+    const nextBestMoveIdx = hint && hint.nextBestMoveIdx ?
+                            'Move empty block to ' + (hint.nextBestMoveIdx + 1) + ' space' : requestHintText;
+
     const gameData = {
       currentBoard, solvedBoard, positionalBoard, boardWidth, boardHeight
     };
+
 
     return (
       <section className="game-details">
@@ -185,7 +188,11 @@ class GameDetails extends React.Component {
                        movesMade={numMovesAlreadyMade}
                        timerSeconds={seconds}
                        boardHeight={boardHeight}
-                       boardWidth={boardWidth}/>
+                       boardWidth={boardWidth}
+                       numOfMoves={numOfMoves}
+                       nextBestMoveIdx={nextBestMoveIdx}
+                       requestingHint={requestingHint}
+                       hintRequestTime={hintRequestTime}/>
         </div>
 
       </section>
