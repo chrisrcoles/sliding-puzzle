@@ -63,12 +63,6 @@ class GameOptions extends React.Component {
       timeFound = "Find a hint"
     }
 
-    console.log(
-      'give me stuff ', nextBestMoveIdx,
-      'moves = ', numOfMoves,
-      'hint = ', requestingHint
-    )
-
 
     return (
       <div className="game-options">
