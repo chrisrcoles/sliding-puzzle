@@ -6,8 +6,6 @@ import GameStatus from './GameStatus';
 import store from '../store';
 import {connect} from 'react-redux';
 
-import GameSolver from '../game-solver-lib/GameSolver';
-
 import {
   resetBoard,
   requestHint,
@@ -78,42 +76,31 @@ class GameDetails extends React.Component {
    * */
   _handleHintRequest(e, gameData) {
     store.dispatch(requestHint());
-    console.log('d = ', gameData)
-    let url = 'http://localhost:8011/api/v1/puzzle/solve';
+    
+    let url = 'http://localhost:8011/puzzle/solve';
     console.log('with game data ' + gameData)
     console.log('get hint with url = ', url)
 
     const options = {'Content-Type': 'application/json', crossOrigin: true};
-
     gameData.positionalBoard =  [].concat.apply([], gameData.positionalBoard);
-
-
     this.request('POST', url, gameData, options)
       .then(hint => {
-        store.dispatch(receivedHint(hint._meta.data))
+        console.log('hint = ', hint)
+        store.dispatch(receivedHint(hint))
       })
   }
 
 
 
   request (method, url, data, options) {
-
     options = options || {};
 
 
     return new Promise(function (resolve, reject) {
       var settings = Object.assign({method, url}, options);
+      // stringify the data before it is sent
       settings.data = JSON.stringify(data);
-
       settings.error = function (jqXHR, textStatus, errorThrown) {
-        console.log(jqXHR.status);
-        console.log(jqXHR.responseText);
-        console.log(errorThrown);
-        console.log('making request with : ',
-          method, url, data, options
-        )
-
-
         reject({
                  statusCode: jqXHR.status,
                  errors: jqXHR.responseJSON && jqXHR.responseJSON.errors ?
@@ -122,7 +109,6 @@ class GameDetails extends React.Component {
 
         reject({jqXHR, textStatus, errorThrown})
       };
-
       settings.success = function (data, textStatus, jqXHR) {
         resolve(data);
       };

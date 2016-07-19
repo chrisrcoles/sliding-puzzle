@@ -27,7 +27,6 @@ const gameDetailsReducer = function(state = initialState, action) {
     break;
 
     case types.RECEIVED_HINT:
-      console.log(' action data = ', action.data)
       return Object.assign({}, state, {
         requestingHint: false,
         hint: action.data.hint.boardSolution,

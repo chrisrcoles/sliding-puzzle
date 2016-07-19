@@ -5,34 +5,7 @@ whatever language you like but make sure it is presented on some sort of
 modern UI platform (i.e. web, android, iOS).
 
 # Solution Outline
-
-Minimum Requirements:
-
-1. Present a solvable puzzle to the end user. Ensure that the user does not
-see a puzzle combination that can't be solved.
-
-2. Add a hint button that tells the user the next best step if they get stuck.
-
-3. If the user decides to give up, there should be a way for them to see the
-sequence of moves needed to solve the puzzle.
-
-4. Detect when the puzzle is solved and notify the user in some way.
-
-Additional Possible Features:
-
-1. Allow the user to select between a few different puzzle sizes (3x3, 4x4, etc)
-
-2. Animate tiles when moving.
-
-3. Keep track of the number of moves used to solve a puzzle.
-
-4. Keep track of those scores per user, create high score board (persist how
-you like).
-
-5. Use famous images (paintings, pictures, public figures) as the tiles instead
-of just numbers.
-
-6. Anything else you can think of.
+See the [doc](docs/solution-outline.md)
 
 *Example Board*
 
@@ -41,9 +14,10 @@ of just numbers.
 
 # Application Architecture
 
-The entire application runs on Node.js, for the application server,
-React, as the View Layer for the User Interface, and Redux as the
-central store that updates application state. Go [here for more information on Redux](http://redux.js.org/)
+The entire application runs on Node.js, for the entire application,
+React, as the View Layer for the User Interface, Redux as the
+central store that updates application state, and Express.js as the
+application server. Go [here for more information on Redux](http://redux.js.org/)
 and [here for more information on React](https://facebook.github.io/react/).
 
 The application uses [Gulp.js](http://gulpjs.com/), an automation tool,
@@ -65,10 +39,6 @@ solving the puzzle is included in this directory.
 * `src/app.js` - Defines the React route that is injected into `index.html` via the `root`'
 * `src/store.js` - Defines the Redux store, and combines each of the applications'
 reducers so that there is one central application state.
-
-* `src/game-solver-lib/` - Game Library that uses Priority Queue along
-with A* algorithm to find the shortest possible solution.
-
 * `server.js` - Initializes our http server
 * `webpack.config.js` - Webpack configuration file
 
@@ -93,6 +63,10 @@ based on whose cost is the lowest.
 See the [doc](docs/environment-setup.md)
 
 # Running the Application
+
+*This project is only the frontend application, if you
+wish to request hints, i.e., shortest number of moves
+possible and the next best move, you must run the api*
 
 *These instructions assume you have already set up the app.*
 
@@ -120,5 +94,4 @@ And in a browser, open:
 # Features In Progress
 
 1. Unit Tests
-2. Making a CLI tool for the `game-solver-lib`
 

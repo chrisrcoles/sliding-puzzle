@@ -1,5 +1,12 @@
 # Environment Setup
 
+# As this project is simply a frontend web application, in
+order for full functionality the web api service must be
+running concurrently as well.
+
+Visit this [repo](https://github.com/chrisrcoles/sliding-puzzle-api)
+for more detailed instructions for running the api.
+
 For this project there are three types of servers to setup:
 
 
