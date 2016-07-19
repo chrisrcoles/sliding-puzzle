@@ -64,38 +64,36 @@ class GameDetails extends React.Component {
    * and when the hint is received, another event is dispatched to
    * the store.
    *
-   * // TODO currently this method takes too long to complete and
-   * causes the browser to crash. Due to the computational resources
-   * needed, this should be fixed. Possible solutions are:
-   * 1. Speeding up the algorithm.
-   * 2. Moving the code to a backend API service that leverages a
-   *    powerful scripting language, like C++, Java, or Python,
-   *    and virtual machine processing power.
    *
    * @param {Event} e
    * */
   _handleHintRequest(e, gameData) {
     store.dispatch(requestHint());
-    
     let url = 'http://localhost:8011/puzzle/solve';
-    console.log('with game data ' + gameData)
-    console.log('get hint with url = ', url)
 
     const options = {'Content-Type': 'application/json', crossOrigin: true};
+    // flatten the array
     gameData.positionalBoard =  [].concat.apply([], gameData.positionalBoard);
+    
     this.request('POST', url, gameData, options)
       .then(hint => {
-        console.log('hint = ', hint)
         store.dispatch(receivedHint(hint))
       })
   }
 
 
 
+  /*
+  * Promisified AJAX request
+  * 
+  * @param {String} method
+  * @param {String} url
+  * @param {Object} data
+  * @param {Object} options
+  * */
   request (method, url, data, options) {
     options = options || {};
-
-
+    
     return new Promise(function (resolve, reject) {
       var settings = Object.assign({method, url}, options);
       // stringify the data before it is sent

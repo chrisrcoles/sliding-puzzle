@@ -17,8 +17,9 @@ See the [doc](docs/solution-outline.md)
 The entire application runs on Node.js, for the entire application,
 React, as the View Layer for the User Interface, Redux as the
 central store that updates application state, and Express.js as the
-application server. Go [here for more information on Redux](http://redux.js.org/)
-and [here for more information on React](https://facebook.github.io/react/).
+http server. Go [here for more information on Redux](http://redux.js.org/),
+[here for more information on React](https://facebook.github.io/react/),
+and [here for more information on Express](https://expressjs.com).
 
 The application uses [Gulp.js](http://gulpjs.com/), an automation tool,
 along with [Webpack](https://webpack.github.io/) to bundle the Javascript
@@ -50,13 +51,7 @@ Currently the board configurations available are:
 
 # Game Solver Library
 
-Implements A * algorithm with priority queue to find the shortest
-puzzle solution. This algorithm effectively assigns a cost to every
-possible board move and explores all child nodes of that board move,
-based on whose cost is the lowest.
-
- - More documentation to come
-
+See the [doc](docs/game-solver-library-explanation.md)
 
 # Setting up the Application - Installation
 
@@ -66,7 +61,8 @@ See the [doc](docs/environment-setup.md)
 
 *This project is only the frontend application, if you
 wish to request hints, i.e., shortest number of moves
-possible and the next best move, you must run the api*
+possible and the next best move, you must run the api
+Check it out [here](https://github.com/chrisrcoles/sliding-puzzle-api)*
 
 *These instructions assume you have already set up the app.*
 
